@@ -215,3 +215,56 @@ test('duplo: anfitrião que recarrega a página retoma a sala mesmo com o códig
   await b.close();
   assert.ok(view);
 });
+
+test('duplo: caminho direto falha na hora e o broker demora: a sala abre sem reiniciar nada', async () => {
+  const b = await startBroker();
+  // Caminho direto que falha logo de cara (servidor da PeerJS fora do ar).
+  const broken = {
+    available: () => true,
+    listen: (id, h) => {
+      setTimeout(() => h.onError && h.onError('network'), 5);
+      return { close() {} };
+    },
+    connect: (id, h) => {
+      setTimeout(() => h.onError && h.onError('network'), 5);
+      return { send: () => false, close() {} };
+    },
+  };
+  // Broker "lento": o anfitrião só consegue falar com ele depois de 1,5 s.
+  const mq = mqttTransport({ brokers: [b.url] });
+  let listens = 0;
+  const slow = {
+    ...mq,
+    listen(id, h, o) {
+      listens += 1;
+      let inner = null;
+      let closed = false;
+      const timer = setTimeout(() => {
+        if (!closed) inner = mq.listen(id, h, o);
+      }, 1500);
+      return {
+        close() {
+          closed = true;
+          clearTimeout(timer);
+          if (inner) inner.close();
+        },
+      };
+    },
+  };
+  const statuses = [];
+  const host = makeHost(dualTransport([broken, slow]));
+  const origOnStatus = host.room.onStatus;
+  host.room.onStatus = (s) => {
+    statuses.push(s.status);
+    origOnStatus(s);
+  };
+  await until(() => host.status === 'aberta', 8000, 'sala abrir pelo broker lento');
+  assert.equal(listens, 1, 'o broker não foi reiniciado');
+  assert.ok(!statuses.includes('reconectando'), 'a sala não mostrou queda: ' + statuses.join(','));
+  const c = makeClient(dualTransport([broken, mqttTransport({ brokers: [b.url], openTimeout: 3000 })]), host.room.code, 'lento1abcd', 'Bia');
+  await until(() => connected(c), 8000, 'entrar');
+  host.room.close();
+  c.room.leave();
+  await sleep(300);
+  await b.close();
+});

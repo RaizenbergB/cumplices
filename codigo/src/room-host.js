@@ -142,7 +142,8 @@ export class HostRoom {
     if (['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'].includes(type)) {
       this.status = 'reconectando';
       this.emitStatus();
-      this.reopenLater(15000);
+      // Transportes que tentam de novo sozinhos avisam quando voltarem (onReady); os outros, reabre.
+      if (!this.transport.selfHealing) this.reopenLater(15000);
     }
     // peer-unavailable e outros erros não afetam o anfitrião
   }

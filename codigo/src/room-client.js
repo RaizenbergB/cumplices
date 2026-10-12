@@ -20,7 +20,7 @@ export class ClientRoom {
     this.stopped = true;
     this.lastPong = 0;
     this.pending = null;
-    this.handles = { retry: null, connect: null, ping: null };
+    this.handles = { retry: null, connect: null, ping: null, resend: null };
   }
 
   start() {
@@ -194,7 +194,17 @@ export class ClientRoom {
       this.pending = null;
       return;
     }
-    if (this.status !== 'conectado' || !this.link || this.now() - p.lastTry < 1500) return;
+    if (this.status !== 'conectado' || !this.link) return;
+    const wait = 1500 - (this.now() - p.lastTry);
+    if (wait > 0) {
+      // Cedo demais para reenviar: tenta de novo daqui a pouco, mesmo que não chegue estado novo.
+      this.clear('resend');
+      this.handles.resend = this.setTimer(() => {
+        this.handles.resend = null;
+        this.maybeResend();
+      }, wait + 20);
+      return;
+    }
     p.tries += 1;
     p.lastTry = this.now();
     this.link.send({ t: 'act', action: p.action });

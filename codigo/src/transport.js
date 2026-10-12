@@ -10,8 +10,16 @@
 //   connect(peerId, { onOpen, onData(msg), onClose, onError(type) }) -> { send(msg) -> bool, close() }
 import { connectMqtt } from './mqtt-lite.js';
 
-/** Servidores públicos e gratuitos de mensagens, tentados juntos. */
-export const PUBLIC_BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt'];
+/**
+ * Servidores públicos e gratuitos de mensagens, tentados juntos (o anfitrião fica em todos).
+ * Testados de um computador no Brasil em out/2026: HiveMQ e Mosquitto responderam; o da EMQX foi
+ * bloqueado naquela rede. Por isso são três: basta um funcionar.
+ */
+export const PUBLIC_BROKERS = [
+  'wss://broker.hivemq.com:8884/mqtt',
+  'wss://test.mosquitto.org:8081/mqtt',
+  'wss://broker.emqx.io:8084/mqtt',
+];
 const MQTT_NS = 'jogo-cumplices/';
 
 function rid(len = 14) {
@@ -28,7 +36,7 @@ function rid(len = 14) {
  * O anfitrião fica conectado em todos os brokers da lista; cada celular tenta todos e fica com o primeiro
  * em que o anfitrião responder. Tópicos: <ns><sala>/h (caixa do anfitrião) e <ns><sala>/c/<link> (caixa do celular).
  */
-export function mqttTransport({ brokers = PUBLIC_BROKERS, WebSocketImpl, openTimeout = 6000, readyTimeout = 12000 } = {}) {
+export function mqttTransport({ brokers = PUBLIC_BROKERS, WebSocketImpl, openTimeout = 6000, readyTimeout = 15000, downGrace = 6000 } = {}) {
   const WS = () => WebSocketImpl || (typeof globalThis !== 'undefined' ? globalThis.WebSocket : undefined);
   const topics = (peerId) => ({
     host: `${MQTT_NS}${peerId}/h`,
@@ -51,10 +59,29 @@ export function mqttTransport({ brokers = PUBLIC_BROKERS, WebSocketImpl, openTim
     listen(peerId, h) {
       const t = topics(peerId);
       let closed = false;
-      let readyFired = false;
-      let errorFired = false;
+      // Estado avisado para a sala: "starting" (abrindo), "up" (alguém alcança o anfitrião) ou "down".
+      // Cada broker tenta de novo sozinho; a sala só fica sabendo quando o estado geral muda.
+      let state = 'starting';
+      let downTimer = null;
+      const anyReady = () => sessions.some((x) => x.ready);
+      const goUp = () => {
+        clearTimeout(downTimer);
+        downTimer = null;
+        if (closed || state === 'up') return;
+        state = 'up';
+        if (h.onReady) h.onReady();
+      };
+      const maybeDown = (delay) => {
+        if (closed || anyReady() || downTimer || state === 'down') return;
+        downTimer = setTimeout(() => {
+          downTimer = null;
+          if (closed || anyReady() || state === 'down') return;
+          state = 'down';
+          if (h.onError) h.onError('network');
+        }, delay);
+      };
       const sessions = brokers.map((url) => {
-        const s = { url, client: null, conns: new Map(), retry: null, attempts: 0, failedOnce: false };
+        const s = { url, client: null, conns: new Map(), retry: null, attempts: 0, ready: false };
         const publishTo = (link, obj) => {
           if (s.client && s.client.connected) s.client.publish(t.client(link), JSON.stringify(obj));
         };
@@ -122,29 +149,24 @@ export function mqttTransport({ brokers = PUBLIC_BROKERS, WebSocketImpl, openTim
               s.client.subscribe(t.host, (ok) => {
                 if (!ok) return s.client.end();
                 s.attempts = 0;
+                s.ready = true;
                 // Quem ainda estava ligado a uma versão antiga deste anfitrião (queda ou página recarregada)
                 // reconecta na hora, em vez de esperar o próximo "ping".
                 s.client.publish(t.all, JSON.stringify({ t: 'reopen' }));
-                if (!readyFired && !closed) {
-                  readyFired = true;
-                  if (h.onReady) h.onReady();
-                }
+                goUp();
               });
             },
             onMessage: (topic, text) => {
               if (topic === t.host) onMsg(text);
             },
             onClose: () => {
+              s.ready = false;
               for (const c of [...s.conns.values()]) c.drop();
               s.conns.clear();
-              s.failedOnce = true;
               if (closed) return;
-              if (!readyFired && !errorFired && sessions.every((x) => x.failedOnce)) {
-                errorFired = true;
-                if (h.onError) h.onError('network');
-              }
+              if (state === 'up') maybeDown(downGrace);
               s.attempts += 1;
-              s.retry = setTimeout(start, Math.min(15000, Math.round(1000 * Math.pow(1.7, s.attempts))));
+              s.retry = setTimeout(start, Math.min(12000, Math.round(800 * Math.pow(1.6, s.attempts - 1))));
             },
           });
         };
@@ -153,16 +175,11 @@ export function mqttTransport({ brokers = PUBLIC_BROKERS, WebSocketImpl, openTim
         return s;
       });
       sessions.forEach((s) => s.start());
-      const watchdog = setTimeout(() => {
-        if (!readyFired && !errorFired && !closed) {
-          errorFired = true;
-          if (h.onError) h.onError('network');
-        }
-      }, readyTimeout);
+      maybeDown(readyTimeout); // ninguém respondeu no começo: avisa (e continua tentando)
       return {
         close() {
           closed = true;
-          clearTimeout(watchdog);
+          clearTimeout(downTimer);
           for (const s of sessions) {
             clearTimeout(s.retry);
             for (const [link, c] of [...s.conns]) {
@@ -277,13 +294,27 @@ export function mqttTransport({ brokers = PUBLIC_BROKERS, WebSocketImpl, openTim
 export function dualTransport(list) {
   const parts = list.filter((tp) => tp && tp.available());
   return {
+    // Cuida sozinho de tentar de novo: a sala não precisa fechar e reabrir tudo quando um caminho cai.
+    selfHealing: true,
     available() {
       return parts.length > 0;
     },
     listen(peerId, h, opts = {}) {
       let closed = false;
-      let anyReady = false;
-      const subs = parts.map((tp) => ({ tp, listener: null, ready: false, retry: null, tries: 0 }));
+      let state = 'starting'; // starting | up | down (o que a sala já sabe)
+      const subs = parts.map((tp) => ({ tp, listener: null, ready: false, failed: false, retry: null, tries: 0 }));
+      const goUp = () => {
+        if (closed || state === 'up') return;
+        state = 'up';
+        if (h.onReady) h.onReady();
+      };
+      const maybeDown = (type, err) => {
+        if (closed || state === 'down' || subs.some((x) => x.ready)) return;
+        // Só avisa a sala quando todos os caminhos já falharam pelo menos uma vez.
+        if (!subs.every((x) => x.failed)) return;
+        state = 'down';
+        if (h.onError) h.onError(type, err);
+      };
       const start = (sub) => {
         if (closed) return;
         sub.listener = sub.tp.listen(
@@ -292,18 +323,15 @@ export function dualTransport(list) {
             onReady: () => {
               if (closed) return;
               sub.ready = true;
+              sub.failed = false;
               sub.tries = 0;
-              if (!anyReady) {
-                anyReady = true;
-                if (h.onReady) h.onReady();
-              }
+              goUp();
             },
             onConnection: (c) => {
               if (!closed && h.onConnection) h.onConnection(c);
             },
             onError: (type, err) => {
               if (closed) return;
-              const someoneElseReady = subs.some((x) => x !== sub && x.ready);
               if (type === 'unavailable-id' && !opts.resume) {
                 // Código já usado por outra sala: a sala troca de código.
                 if (h.onError) h.onError(type, err);
@@ -311,7 +339,8 @@ export function dualTransport(list) {
               }
               if (type === 'peer-unavailable') return; // não afeta quem escuta
               sub.ready = false;
-              if (!someoneElseReady && type !== 'unavailable-id' && h.onError) h.onError(type, err);
+              sub.failed = true;
+              maybeDown(type === 'unavailable-id' ? 'network' : type, err);
               if (sub.tp.selfHealing && type !== 'unavailable-id') return; // ele mesmo tenta de novo
               clearTimeout(sub.retry);
               sub.tries += 1;
