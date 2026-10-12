@@ -94,11 +94,35 @@ const tableRowsShort = ROWS.map(
   ([label, n]) => `<tr><td>${label}</td><td><b>${TABLE[n].meta} IGUAIS</b> em até ${TABLE[n].rounds} perguntas</td></tr>`,
 ).join('');
 const majority = [5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<tr><td>${n}</td><td>${Math.floor(n / 2) + 1}</td></tr>`).join('');
+const majorityInline = [5, 6, 7, 8, 9, 10, 11, 12].map((n) => `${n}→${Math.floor(n / 2) + 1}`).join(' ');
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const questionList = QUESTIONS.map(
+  (q) => `<li><b>${esc(q.q)}</b> <span>1) ${esc(q.a[0])} / 2) ${esc(q.a[1])} / 3) ${esc(q.a[2])}</span></li>`,
+).join('');
+// Resultado das simulações (gerado por: node sim/relatorio.mjs 4000 > sim/resultado.json)
+let simRows = '';
+let simTotal = '';
+try {
+  const sim = JSON.parse(read('sim/resultado.json'));
+  simTotal = (sim.total || 0).toLocaleString('pt-BR');
+  simRows = sim.rows
+    .map(
+      (r) =>
+        `<tr><td>${r.n}</td><td>${r.meta} em ${r.rodadas}</td><td>${r.atenta}%</td><td>${r.normal}%</td><td>${r.cautelosa}%</td><td>${r.afobada}%</td><td>${r.rodadasMedia.toLocaleString('pt-BR')}</td></tr>`,
+    )
+    .join('');
+} catch (e) {
+  throw new Error('Faltou sim/resultado.json (rode: node sim/relatorio.mjs 4000 > sim/resultado.json)');
+}
 let rules = read('src/regras.html')
   .replace('{{HEAD}}', head('Cúmplices: regras', 'Livro de regras do Cúmplices: preparação, rodada, fim de jogo, exemplos, dúvidas, variantes e resumo para imprimir.'))
   .replaceAll('{{TABELA}}', tableRows)
   .replaceAll('{{TABELA_CURTA}}', tableRowsShort)
   .replaceAll('{{MAIORIA}}', majority)
+  .replaceAll('{{MAIORIA_LINHA}}', majorityInline)
+  .replaceAll('{{LISTA_PERGUNTAS}}', questionList)
+  .replaceAll('{{SIMULACAO}}', simRows)
+  .replaceAll('{{SIMULACAO_TOTAL}}', simTotal)
   .replaceAll('{{SITE}}', SITE_URL)
   .replaceAll('{{PERGUNTAS}}', String(QUESTIONS.length))
   .replaceAll('{{PRIMEIRA_ACUSACAO}}', FIRST_ACCUSATION_ROUND === 2 ? 'segunda' : String(FIRST_ACCUSATION_ROUND) + 'ª');

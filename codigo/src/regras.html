@@ -3,20 +3,474 @@
 <head>
 {{HEAD}}
 <style>
-@font-face{font-family:'Rubik';font-weight:400;font-display:swap;src:url('fontes/rubik-400.woff2') format('woff2')}
-@font-face{font-family:'Rubik';font-weight:800;font-display:swap;src:url('fontes/rubik-800.woff2') format('woff2')}
-body{margin:0;background:#f3f5f9;color:#171b2e;font:17px/1.55 'Rubik',system-ui,sans-serif}
-main{max-width:40rem;margin:0 auto;padding:24px 16px 64px}
-h1{font-weight:800;font-size:2rem;margin:0 0 8px}
-table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border-bottom:1px solid #d8dde8;padding:6px 4px;text-align:left}
-a{color:#2f5db5;font-weight:700}
-@media (prefers-color-scheme:dark){body{background:#0f121c;color:#eceef5}td,th{border-color:#2b3144}a{color:#7aa2f7}}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:400;font-display:swap;src:url('fontes/rubik-400.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:500;font-display:swap;src:url('fontes/rubik-500.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:700;font-display:swap;src:url('fontes/rubik-700.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:800;font-display:swap;src:url('fontes/rubik-800.woff2') format('woff2')}
+@font-face{font-family:'Rubik Dirt';font-style:normal;font-weight:400;font-display:swap;src:url('fontes/rubik-dirt-carimbo.woff2') format('woff2')}
+:root{
+  --paper:#f3f5f9;--surface:#fff;--ink:#171b2e;--muted:#5b6276;--line:#d8dde8;--soft:#e8ecf3;
+  --pair:#d94e1a;--pair-soft:#fbe3d7;--det:#2f5db5;--det-soft:#dfe7f7;
+  --a:#0b7f72;--a-soft:#d7f0ec;--b:#a87100;--b-soft:#f7ebcb;--c:#95307a;--c-soft:#f3dbeb;
+  --body:'Rubik',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;--stamp:'Rubik Dirt','Rubik',Impact,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme='light']){
+  --paper:#0f121c;--surface:#181c29;--ink:#eceef5;--muted:#a1a8bc;--line:#2b3144;--soft:#222738;
+  --pair:#ff7a45;--pair-soft:#3a2117;--det:#7aa2f7;--det-soft:#1a2540;
+  --a:#39c3b2;--a-soft:#12302c;--b:#edb53a;--b-soft:#33280f;--c:#dd72c0;--c-soft:#34192d;color-scheme:dark}}
+:root[data-theme='dark']{--paper:#0f121c;--surface:#181c29;--ink:#eceef5;--muted:#a1a8bc;--line:#2b3144;--soft:#222738;
+  --pair:#ff7a45;--pair-soft:#3a2117;--det:#7aa2f7;--det-soft:#1a2540;--a:#39c3b2;--a-soft:#12302c;--b:#edb53a;--b-soft:#33280f;--c:#dd72c0;--c-soft:#34192d;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 var(--body)}
+main{max-width:42rem;margin:0 auto;padding:20px 16px 72px}
+h1,h2,h3{line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;padding-top:12px;border-top:3px solid var(--ink)}
+h3{font-size:1.125rem;font-weight:800;margin-top:24px}
+p,ul,ol{margin:10px 0 0}
+ul,ol{padding-left:1.4em}
+li+li{margin-top:6px}
+a{color:var(--det);font-weight:700;overflow-wrap:anywhere}
+b,strong{font-weight:700}
+.mark{display:inline-flex;font-size:2.4rem}
+.mark i{width:1em;height:1em;border-radius:50%;background:var(--pair);display:block}
+.mark i+i{margin-left:-.42em;background:var(--det);mix-blend-mode:multiply}
+@media (prefers-color-scheme:dark){.mark i+i{mix-blend-mode:screen}}
+.stamp{display:inline-block;font-family:var(--stamp);text-transform:uppercase;line-height:1;padding:.14em .32em .07em;border:.08em solid currentColor;border-radius:.14em;transform:rotate(-4deg);white-space:nowrap}
+.logo{font-size:clamp(2.3rem,11vw,3.2rem);color:var(--pair);margin:10px 0 6px 6px;transform-origin:left center}
+.s-igual{color:var(--pair);font-size:1.05em;transform:rotate(-3deg)}
+.s-dif{color:var(--det);font-size:1.05em;transform:rotate(-3deg)}
+.s-small{font-size:.95em}
+.sub{font-size:1.25rem;font-weight:500;margin-top:14px;max-width:28ch}
+.facts{margin-top:14px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 16px;border-radius:14px;border:2px solid var(--ink);color:var(--ink);background:transparent;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper)}
+nav.toc{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+nav.toc ol{columns:2 14rem;column-gap:24px;margin:6px 0 0}
+nav.toc li{break-inside:avoid;margin:0 0 4px}
+nav.toc a{font-weight:500;color:var(--ink)}
+.callout{margin-top:14px;border-radius:14px;padding:12px 14px;background:var(--b-soft)}
+.callout.no{background:var(--pair-soft)}
+.callout.ok{background:var(--a-soft)}
+.case{margin-top:14px;border-left:4px solid var(--det);padding:4px 0 4px 14px}
+.case h4{margin:0;font-size:1rem}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.875rem;color:var(--muted);font-weight:700}
+.tablewrap{overflow-x:auto}
+.ways td:first-child{font-weight:700;white-space:nowrap}
+.steps{counter-reset:p;list-style:none;padding:0}
+.steps>li{counter-increment:p;position:relative;padding-left:44px;margin-top:14px}
+.steps>li::before{content:counter(p);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:800;font-size:.95rem}
+.opt{display:inline-flex;align-items:center;justify-content:center;width:1.5em;height:1.5em;border-radius:.35em;font-weight:800;font-size:.85em;color:#fff;vertical-align:.08em}
+.oa{background:var(--a)}.ob{background:var(--b)}.oc{background:var(--c)}
+.faq dt{font-weight:700;margin-top:16px}
+.faq dd{margin:4px 0 0}
+details.qs{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+details.qs summary{font-weight:700;cursor:pointer}
+.qlist{columns:2 18rem;column-gap:28px;font-size:.9375rem;padding-left:1.6em}
+.qlist li{break-inside:avoid}
+.qlist span{color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+/* Resumo de uma página */
+.resumo{margin-top:16px;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:18px}
+.resumo h3{margin-top:14px}
+.resumo .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.resumo .top .stamp{font-size:1.9rem;color:var(--pair)}
+.resumo .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:4px 22px}
+.resumo p,.resumo li{font-size:.95rem}
+.resumo table{font-size:.9rem}
+footer{margin-top:48px;color:var(--muted);font-size:.875rem}
+:focus-visible{outline:3px solid var(--det);outline-offset:2px}
+@media print{
+  @page{size:A4;margin:14mm 14mm 16mm}
+  body{background:#fff;color:#000;font-size:10.5pt;line-height:1.45}
+  main{max-width:none;padding:0}
+  .actions,nav.toc,.noprint{display:none!important}
+  h2{margin-top:22px;break-after:avoid}
+  h3{break-after:avoid}
+  table,.case,.callout,.faq dd{break-inside:avoid}
+  details.qs{border:0;padding:0}
+  details.qs:not([open]) > :not(summary){display:block}
+  #resumo-sec{break-before:page}
+  body.so-resumo main > :not(#resumo-sec){display:none!important}
+  body.so-resumo #resumo-sec{break-before:auto;border:0;margin:0;padding:0}
+  body.so-resumo #resumo-sec > h2{display:none}
+  .resumo{border:1.5pt solid #000;border-radius:10pt;padding:12pt}
+  a{color:#000;text-decoration:none}
+}
 </style>
 </head>
-<body><main>
-<h1>Regras do Cúmplices</h1>
-<p>O livro de regras completo chega em instantes. Enquanto isso, use o <a href="./">Como jogar</a> dentro do jogo.</p>
-<table><thead><tr><th>Pessoas</th><th>Meta</th><th>Perguntas</th><th>Mais fácil</th><th>Mais difícil</th></tr></thead><tbody>{{TABELA}}</tbody></table>
-<table hidden>{{TABELA_CURTA}}{{MAIORIA}}</table>
-<p hidden>{{SITE}} {{PERGUNTAS}} {{PRIMEIRA_ACUSACAO}}</p>
-</main></body></html>
+<body>
+<main>
+<header>
+  <span class="mark" aria-hidden="true"><i></i><i></i></span>
+  <h1><span class="stamp logo">Cúmplices</span><br><span class="muted" style="font-size:1.125rem;font-weight:700">Livro de regras</span></h1>
+  <p class="sub">Dois de vocês pensam igual. O resto tem que descobrir quem.</p>
+  <p class="facts">Para 5 a 12 pessoas, a partir de 10 anos. Cada partida leva uns 10 minutos. Para aprender, 3 minutos.</p>
+  <div class="actions">
+    <a class="btn primary" href="./">Jogar agora</a>
+    <a class="btn" href="kit/cumplices-kit-para-imprimir.pdf">Kit para imprimir (PDF)</a>
+    <button class="btn" type="button" data-print="resumo">Imprimir o resumo</button>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sumário">
+  <b>Sumário</b>
+  <ol>
+    <li><a href="#visao">Visão geral</a></li>
+    <li><a href="#precisa">O que vocês precisam</a></li>
+    <li><a href="#preparacao">Preparação</a></li>
+    <li><a href="#rodada">Como funciona uma rodada</a></li>
+    <li><a href="#fim">Fim de jogo e pontuação</a></li>
+    <li><a href="#exemplo">Exemplo de partida</a></li>
+    <li><a href="#duvidas">Dúvidas e casos especiais</a></li>
+    <li><a href="#variantes">Variantes</a></li>
+    <li><a href="#narrador">Sem celular: com narrador</a></li>
+    <li><a href="#dicas">Dicas</a></li>
+    <li><a href="#ensinar">Como ensinar em 3 minutos</a></li>
+    <li><a href="#simulacoes">Por que essas metas?</a></li>
+    <li><a href="#resumo-sec">Resumo de uma página</a></li>
+    <li><a href="#perguntas">Lista de perguntas</a></li>
+  </ol>
+</nav>
+
+<section id="visao">
+<h2>1. Visão geral</h2>
+<p>No começo, o jogo sorteia em segredo <b>dois cúmplices</b>. Os dois sabem quem é a sua dupla. Todo o resto é <b>detetive</b> e não sabe de nada.</p>
+<p>A cada rodada aparece uma pergunta boba com três respostas. Por exemplo: “Qual é o melhor salgado de festa? Coxinha, empada ou quibe?”. Todo mundo responde ao mesmo tempo, em silêncio.</p>
+<p>Depois, todas as respostas aparecem. O jogo conta só uma coisa: os dois cúmplices responderam <span class="stamp s-igual s-small">igual</span> ou <span class="stamp s-dif s-small">diferente</span>?</p>
+<ul>
+  <li>Os <b>cúmplices</b> querem responder igual muitas vezes, sem combinar nada e sem dar bandeira.</li>
+  <li>Os <b>detetives</b> querem descobrir a dupla antes disso.</li>
+</ul>
+<p>Ninguém é eliminado. Todo mundo responde todas as perguntas e vota em todas as acusações.</p>
+</section>
+
+<section id="precisa">
+<h2>2. O que vocês precisam</h2>
+<p>Escolha um dos três jeitos de jogar. As regras são as mesmas.</p>
+<div class="tablewrap"><table class="ways">
+  <thead><tr><th>Jeito</th><th>Precisa de</th><th>Bom para</th></tr></thead>
+  <tbody>
+    <tr><td>Cada um no seu celular</td><td>1 celular com internet por pessoa. Mais nada.</td><td>Mesa ou chamada de vídeo</td></tr>
+    <tr><td>Um celular só</td><td>1 celular, que passa de mão em mão no começo. Depois que o site abre, não precisa de internet.</td><td>Mesa com internet ruim</td></tr>
+    <tr><td>Sem celular</td><td>1 narrador que não joga, papel, caneta e um baralho comum. Ou o kit impresso.</td><td>Hoje mesmo, sem nada</td></tr>
+  </tbody>
+</table></div>
+<p><b>Kit para imprimir (opcional):</b> 10 folhas A4 em tamanho real, com linhas de corte. São 12 credenciais (2 de cúmplice e 10 de detetive), 60 cartas de pergunta, a folha do narrador e o resumo de uma página. As cartas têm 63 × 88 mm, o tamanho de carta de baralho. <a href="kit/cumplices-kit-para-imprimir.pdf">Baixar o kit</a>.</p>
+</section>
+
+<section id="preparacao">
+<h2>3. Preparação</h2>
+<p>Com cada um no seu celular, a preparação leva um minuto.</p>
+<ol class="steps">
+  <li>Uma pessoa abre <a href="{{SITE}}">{{SITE}}</a> e toca em <b>Criar sala</b>. Ela é o <b>anfitrião</b>: o celular dela guarda a partida e precisa ficar com a tela acesa até o fim.</li>
+  <li>Os outros abrem o site, tocam em <b>Entrar numa sala</b> e digitam o código de 4 letras. Também dá para entrar pelo link (botão <b>Copiar link</b>) ou apontando a câmera para o QR code na tela do anfitrião.</li>
+  <li>Com 5 a 12 pessoas na sala, o anfitrião toca em <b>Começar partida</b>.</li>
+  <li>Cada um <b>segura o botão</b> para ver o seu papel e solta para esconder. Os cúmplices veem o nome da sua dupla.</li>
+</ol>
+<div class="callout no"><b>Não vale:</b> mostrar a tela, espiar a tela dos outros ou combinar sinais, nem antes da partida.</div>
+</section>
+
+<section id="rodada">
+<h2>4. Como funciona uma rodada</h2>
+<p>Cada rodada é uma pergunta e tem quatro passos.</p>
+
+<h3>Passo 1: responder em silêncio</h3>
+<p>A pergunta aparece com três respostas: <span class="opt oa">A</span> <span class="opt ob">B</span> e <span class="opt oc">C</span>. Cada um toca na sua. Dá para trocar até a última pessoa responder.</p>
+<p>Desde a hora em que a pergunta aparece até a revelação, <b>ninguém fala nada sobre as respostas</b>.</p>
+<ul>
+  <li><b>Cúmplice:</b> tente escolher a mesma resposta da sua dupla, sem combinar.</li>
+  <li><b>Detetive:</b> responda o que quiser. Veja nas <a href="#dicas">dicas</a> como a sua resposta pode ajudar a mesa.</li>
+</ul>
+
+<h3>Passo 2: revelação</h3>
+<p>Quando todos respondem, o celular mostra quem escolheu o quê e dá um carimbo:</p>
+<ul>
+  <li><span class="stamp s-igual s-small">igual</span>: os dois cúmplices escolheram a mesma resposta. Eles ganham <b>1 ponto</b>.</li>
+  <li><span class="stamp s-dif s-small">diferente</span>: escolheram respostas diferentes. Nada acontece.</li>
+</ul>
+<p>O celular nunca diz quem são os cúmplices. Ele só diz se a dupla respondeu igual.</p>
+
+<h3>Passo 3: conversa</h3>
+<p>Agora vale tudo: perguntar, desconfiar, defender, se fazer de bobo e até mentir. “Por que você escolheu ficar sem banho?” “Vocês dois responderam junto de novo!”</p>
+<p>O histórico, na tela, mostra as respostas de todas as perguntas.</p>
+
+<h3>Passo 4: acusação (a partir da {{PRIMEIRA_ACUSACAO}} pergunta)</h3>
+<p>Na primeira pergunta ninguém acusa: é só para observar.</p>
+<p>Da segunda em diante, qualquer jogador pode <b>propor uma acusação</b>: escolhe as duas pessoas que acha que são os cúmplices. Então <b>todos votam ao mesmo tempo</b>, sim ou não, inclusive quem propôs e os acusados.</p>
+<p>A acusação é <b>aprovada</b> se mais da metade da mesa disser sim:</p>
+<div class="tablewrap"><table style="max-width:20rem">
+  <thead><tr><th>Pessoas na mesa</th><th>Sins necessários</th></tr></thead>
+  <tbody>{{MAIORIA}}</tbody>
+</table></div>
+<ul>
+  <li><b>Aprovada e certa:</b> os detetives vencem na hora.</li>
+  <li><b>Aprovada e errada:</b> o celular carimba <span class="stamp s-dif s-small">inocentes</span>. Os cúmplices ganham <b>1 ponto</b>, essa dupla não pode ser acusada de novo e a rodada acaba.</li>
+  <li><b>Recusada:</b> nada acontece. A conversa continua e outra pessoa pode propor outra acusação.</li>
+</ul>
+<p>Cada pessoa pode propor <b>uma acusação por pergunta</b>. Quando a mesa quiser seguir, cada um toca em <b>Pronto para a próxima</b>. O anfitrião também pode passar adiante.</p>
+</section>
+
+<section id="fim">
+<h2>5. Fim de jogo e pontuação</h2>
+<p>Os cúmplices ganham pontos de dois jeitos: a cada <b>IGUAL</b> e a cada <b>acusação errada aprovada</b>.</p>
+<ul>
+  <li><b>Os cúmplices vencem</b> assim que chegam à meta.</li>
+  <li><b>Os detetives vencem</b> se acusarem a dupla certa, ou se as perguntas acabarem antes de os cúmplices chegarem à meta.</li>
+</ul>
+<p>A meta e o número de perguntas dependem de quantas pessoas jogam. O site já usa a linha certa.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Pessoas</th><th>Meta dos cúmplices</th><th>Perguntas</th><th>Opção “mais fácil”</th><th>Opção “mais difícil”</th></tr></thead>
+  <tbody>{{TABELA}}</tbody>
+</table></div>
+<p>A última pergunta termina na revelação: se ali os cúmplices não chegarem à meta, os detetives vencem. No fim, o celular revela a dupla e mostra o histórico completo.</p>
+<div class="callout ok"><b>Placar da noite (opcional).</b> Jogando várias partidas seguidas, o site soma pontos: cada detetive do time vencedor ganha 1 e cada cúmplice vencedor ganha 2. Como os papéis são sorteados de novo a cada partida, quem está atrás sempre pode virar.</div>
+</section>
+
+<section id="exemplo">
+<h2>6. Exemplo de partida</h2>
+<p>Seis amigos: Ana, Bia, Caio, Duda, Edu e Fê. Com 6 pessoas, a meta é 3 IGUAIS em até 5 perguntas. Os cúmplices sorteados são <b>Caio e Fê</b>, mas só eles sabem disso.</p>
+
+<div class="case"><h4>Pergunta 1: “Miojo é: (A) comida de verdade, (B) lanche de emergência ou (C) um crime?”</h4>
+<p>Ana e Duda escolhem A. Bia, Caio, Edu e Fê escolhem B. Ninguém escolhe C.</p>
+<p>Carimbo: <span class="stamp s-igual s-small">igual</span>. Os cúmplices ganham 1 ponto (1 de 3).</p>
+<p>A mesa conversa: “A dupla está entre os quatro do B… ou são a Ana e a Duda!” Na primeira pergunta ninguém acusa.</p></div>
+
+<div class="case"><h4>Pergunta 2: “Melhor superpoder: (A) voar, (B) ficar invisível ou (C) ler mentes?”</h4>
+<p>Ana e Caio: A. Bia e Fê: B. Duda e Edu: C.</p>
+<p>Carimbo: <span class="stamp s-dif s-small">diferente</span>. Sem ponto.</p>
+<p>Bia propõe: “Acuso a Ana e a Duda. Responderam juntas na primeira!” Votação: Bia, Caio, Edu e Fê dizem sim; Ana e Duda dizem não. São 4 sins de 6: aprovada.</p>
+<p>O celular revela: <span class="stamp s-dif s-small">inocentes</span>. Os cúmplices ganham 1 ponto (2 de 3) e a rodada acaba. Repare: Caio e Fê votaram sim numa acusação errada. Isso fica no histórico.</p></div>
+
+<div class="case"><h4>Pergunta 3: “Pior castigo: (A) uma semana sem internet, (B) sem doce ou (C) sem banho?”</h4>
+<p>Ana, Bia e Duda: A. Caio e Edu: B. Fê: C.</p>
+<p>Carimbo: <span class="stamp s-dif s-small">diferente</span>.</p>
+<p>Edu pensa alto: “Caio e Fê responderam igual na 1ª e diferente na 2ª e na 3ª. Bate com os três carimbos. E os dois votaram sim contra a Ana e a Duda.” Ele propõe: “Acuso o Caio e a Fê.”</p>
+<p>Ana, Bia, Duda e Edu dizem sim: 4 de 6, aprovada. O celular revela que eram mesmo Caio e Fê: <span class="stamp s-dif s-small">detetives venceram</span></p></div>
+<p>Se o Edu tivesse errado, os cúmplices ganhariam o terceiro ponto e venceriam ali mesmo. Por isso toda acusação é um risco.</p>
+</section>
+
+<section id="duvidas">
+<h2>7. Dúvidas frequentes e casos especiais</h2>
+<dl class="faq">
+  <dt>Por que o mínimo é 5 pessoas?</dt>
+  <dd>Para aprovar uma acusação, mais da metade da mesa precisa dizer sim, e os dois cúmplices sempre podem dizer não. Com 4 pessoas, os 2 detetives nunca chegariam aos 3 votos. Com 5, os 3 detetives precisam concordar.</dd>
+  <dt>Os cúmplices podem combinar alguma coisa?</dt>
+  <dd>Não. Nada de sinal, código, piscada ou acordo, nem antes da partida. O desafio é pensar igual sem combinar.</dd>
+  <dt>Pode mentir?</dt>
+  <dd>Na conversa, sim. Todo mundo pode dizer o que quiser. Só não vale mostrar a tela.</dd>
+  <dt>Pode falar enquanto as pessoas respondem?</dt>
+  <dd>Não. É silêncio desde a pergunta até a revelação. Se alguém falar e atrapalhar, o anfitrião troca a pergunta.</dd>
+  <dt>Dá para mudar a resposta?</dt>
+  <dd>Sim, até a última pessoa responder. Aí a revelação acontece sozinha.</dd>
+  <dt>Os cúmplices podem acusar e votar sim nas acusações?</dt>
+  <dd>Podem. Votar sim numa acusação errada dá ponto para eles, mas fica registrado.</dd>
+  <dt>Pode acusar a si mesmo?</dt>
+  <dd>Não. O celular não deixa escolher o próprio nome.</dd>
+  <dt>Pode acusar de novo uma dupla inocentada?</dt>
+  <dd>Essa mesma dupla, não. Mas cada uma dessas pessoas ainda pode ser acusada junto com outra.</dd>
+  <dt>E se der empate na votação da acusação?</dt>
+  <dd>Não aprova. Precisa de mais da metade da mesa dizendo sim. Com 6 pessoas, 3 sins não bastam.</dd>
+  <dt>Quantas acusações cabem numa pergunta?</dt>
+  <dd>Cada pessoa pode propor uma. Se uma acusação errada for aprovada, a pergunta acaba na hora.</dd>
+  <dt>E se todo mundo escolher a mesma resposta?</dt>
+  <dd>O carimbo diz IGUAL, porque a dupla está ali, mas ninguém descobre nada. Ótimo para os cúmplices.</dd>
+  <dt>Os cúmplices responderam igual por acaso. Vale?</dt>
+  <dd>Vale. O carimbo só olha as respostas.</dd>
+  <dt>Alguém não responde e a partida trava.</dt>
+  <dd>O anfitrião toca em <b>Encerrar votação agora</b>. Quem não respondeu fica sem resposta. Se for um cúmplice, conta como DIFERENTE.</dd>
+  <dt>Alguém não vota na acusação.</dt>
+  <dd>O anfitrião pode encerrar a votação. Quem não votou conta como “não”.</dd>
+  <dt>A pergunta ficou confusa, ou alguém falou sem querer.</dt>
+  <dd>Antes da revelação, o anfitrião toca em <b>Trocar pergunta</b>. Vem outra, e as respostas dadas são apagadas.</dd>
+  <dt>O celular de alguém caiu ou a internet piscou.</dt>
+  <dd>Ele volta sozinho em alguns segundos. Se não voltar, é só abrir o link de novo: a pessoa volta para o mesmo lugar, com o mesmo papel e as mesmas respostas.</dd>
+  <dt>Alguém trocou de celular no meio da partida.</dt>
+  <dd>Entre na sala com o mesmo nome. Se o celular antigo estiver desconectado, a pessoa recupera o lugar.</dd>
+  <dt>O celular do anfitrião bloqueou ou a página recarregou.</dt>
+  <dd>Abra o site de novo e toque em <b>Voltar para a sala</b>. A partida continua de onde parou, com o mesmo código, e todos voltam sozinhos. Dica: deixe o anfitrião num celular carregando. O site tenta manter a tela acesa.</dd>
+  <dt>Alguém precisa ir embora.</dt>
+  <dd>O anfitrião toca em <b>Encerrar partida</b> e começa outra sem a pessoa. As partidas são rápidas.</dd>
+  <dt>Alguém viu o papel de outra pessoa sem querer.</dt>
+  <dd>Encerrem a partida e comecem outra.</dd>
+  <dt>Chegou alguém no meio da partida.</dt>
+  <dd>A pessoa entra na sala e assiste. Ela joga a partir da próxima partida.</dd>
+  <dt>E se aparecerem mais de 12 pessoas?</dt>
+  <dd>A sala aceita até 12. Com mais gente, façam duas salas, ou revezem: quem fica de fora entra na próxima.</dd>
+  <dt>Dá para jogar à distância?</dt>
+  <dd>Sim. Façam uma chamada de vídeo ou de voz e cada um entra na sala pelo próprio celular.</dd>
+  <dt>Precisa de internet?</dt>
+  <dd>Com cada um no seu celular, sim. No modo um celular só, basta abrir o site uma vez com internet.</dd>
+  <dt>As perguntas repetem?</dt>
+  <dd>São {{PERGUNTAS}} perguntas. O celular do anfitrião evita repetir até usar todas.</dd>
+  <dt>Dá para trapacear pelo código do site?</dt>
+  <dd>Quem entende de programação até conseguiria. É jogo entre amigos: combinem que não vale.</dd>
+</dl>
+</section>
+
+<section id="variantes">
+<h2>8. Variantes</h2>
+<h3>Para iniciantes: pergunta de treino</h3>
+<p>Ligue <b>Pergunta de treino</b> nas opções da sala. A primeira pergunta não vale ponto e ninguém acusa: serve para todo mundo ver como funciona. Na primeira partida da turma, alguém lê em voz alta o <a href="#ensinar">roteiro de 3 minutos</a>.</p>
+<h3>Mais fácil ou mais difícil para os cúmplices</h3>
+<p>Se os cúmplices perdem quase sempre, escolham <b>Mais fácil</b>. Se ganham quase sempre, <b>Mais difícil</b>. A <a href="#fim">tabela da seção 5</a> mostra o que muda.</p>
+<h3>Relógio de conversa</h3>
+<p>Nas opções da sala, escolha 1, 1,5 ou 2 minutos de conversa por pergunta. Quando o tempo acaba, vem a próxima pergunta. O relógio para enquanto a mesa vota uma acusação.</p>
+<h3>Grupos grandes (9 a 12 pessoas)</h3>
+<ul>
+  <li>Liguem o relógio de conversa em 1,5 ou 2 minutos, para o ritmo não cair.</li>
+  <li>Na hora de acusar, fala uma pessoa por vez.</li>
+  <li>Com mais de 12, dividam em duas salas.</li>
+</ul>
+<h3>Um celular só</h3>
+<p>Toque em <b>Jogar com um celular só</b> e escreva os nomes. O celular passa de mão em mão: cada um segura o botão para ver o papel e passa adiante. Depois ele fica no meio da mesa.</p>
+<ol class="steps">
+  <li>Alguém lê a pergunta e as respostas em voz alta. A vale 1 dedo, B vale 2 e C vale 3.</li>
+  <li>Todos pensam com a mão escondida. “Um, dois, três, já!”: todos mostram 1, 2 ou 3 dedos ao mesmo tempo.</li>
+  <li>Alguém marca no celular os dedos de cada um e toca em <b>Revelar</b>.</li>
+  <li>Para acusar, alguém diz a dupla e todos levantam a mão (sim) ou não, juntos. Se a acusação passar, toque em <b>A mesa aprovou uma acusação</b> e marque a dupla. O celular revela.</li>
+</ol>
+<p>Quem esquecer o papel toca em <b>Rever papel</b>.</p>
+<h3>Perguntas da casa (com narrador)</h3>
+<p>O narrador inventa perguntas sobre a própria turma: “Quem dorme primeiro numa viagem: Bia, Caio ou Edu?”. Costumam ser as mais engraçadas.</p>
+</section>
+
+<section id="narrador">
+<h2>9. Sem celular: jogo com narrador</h2>
+<p>Para jogar hoje mesmo, sem nada de especial.</p>
+<p><b>Precisa de:</b> 1 narrador, que não joga (pode revezar a cada partida); 5 a 12 jogadores; papel e caneta; e um baralho comum ou as credenciais do kit. As perguntas podem vir das cartas do kit, da <a href="#perguntas">lista no fim desta página</a> ou da cabeça do narrador.</p>
+<h3>Preparação</h3>
+<ol class="steps">
+  <li>Separe uma carta por jogador: os <b>dois reis vermelhos</b> (copas e ouros) e, para completar, cartas pretas quaisquer. Rei vermelho é cúmplice; carta preta é detetive. Com o kit, use 2 credenciais de cúmplice e as de detetive.</li>
+  <li>Embaralhe e dê uma carta para cada um, virada para baixo. Cada um olha a sua em segredo e devolve ao narrador, ainda virada.</li>
+  <li>O narrador fala: “Todos fechem os olhos.” “Cúmplices, abram os olhos e vejam a sua dupla.” O narrador também olha quem são. “Cúmplices, fechem os olhos.” “Todos, abram os olhos.”</li>
+  <li>O narrador desenha uma grade no papel: uma linha por jogador e uma coluna por pergunta. É o histórico, e qualquer um pode pedir para ver. Ele anota também a meta (<a href="#fim">tabela da seção 5</a>).</li>
+</ol>
+<h3>Rodada</h3>
+<ol class="steps">
+  <li>O narrador lê a pergunta e as respostas com números: “1, coxinha. 2, empada. 3, quibe.”</li>
+  <li>Todos pensam em silêncio, com a mão escondida. O narrador conta “um, dois, três, já!” e todos mostram 1, 2 ou 3 dedos ao mesmo tempo, com a mão parada.</li>
+  <li>O narrador anota os dedos de cada um na grade e anuncia, sem fazer cara de nada: “<b>IGUAL!</b>” ou “<b>DIFERENTE!</b>”. Se for IGUAL, marca 1 ponto para os cúmplices.</li>
+  <li>A partir da 2ª pergunta, quem quiser diz: “Acuso Fulano e Beltrano.” O narrador conta “um, dois, três” e todos levantam a mão (sim) ou não, juntos. Se mais da metade da mesa levantar a mão, o narrador revela: “Certo!” (os detetives vencem) ou “Errado!” (1 ponto para os cúmplices; essa dupla fica inocentada e vem a próxima pergunta).</li>
+  <li>Quando a mesa quiser seguir, ou depois de uns 2 minutos, o narrador lê a próxima pergunta.</li>
+</ol>
+<div class="callout"><b>Dedos atrasados.</b> Quem mostrar os dedos depois do “já”, mudar os dedos ou mostrar outro número fica sem resposta naquela pergunta. Se for um cúmplice, conta como DIFERENTE.</div>
+<p>No fim, o narrador revela quem eram os cúmplices.</p>
+</section>
+
+<section id="dicas">
+<h2>10. Dicas</h2>
+<h3>Para os cúmplices</h3>
+<ul>
+  <li>Pense no que a sua dupla responderia. Quase sempre é a resposta mais óbvia, e ela ainda esconde vocês no meio de muita gente.</li>
+  <li>Responder igual numa resposta que pouca gente escolheu é perigoso: vocês viram suspeitos na hora.</li>
+  <li>Votar sim numa acusação errada dá ponto, mas fica no histórico.</li>
+  <li>Na conversa, desconfie de alguém com convicção. Quem acusa parece detetive.</li>
+</ul>
+<h3>Para os detetives</h3>
+<ul>
+  <li>O carimbo é a melhor pista. Com IGUAL, a dupla escolheu a mesma resposta; com DIFERENTE, respostas diferentes. Procure as duplas que batem com todos os carimbos.</li>
+  <li>Você sabe que é inocente: toda dupla com você está fora.</li>
+  <li>Responder diferente da maioria pode provar a sua inocência. Se der IGUAL e você ficou sozinho numa resposta, você não é cúmplice.</li>
+  <li>Repare em quem votou sim nas acusações erradas.</li>
+  <li>Acusação apressada dá ponto para eles. Com a meta perto, só acuse com bastante certeza, ou quando for a última chance.</li>
+</ul>
+</section>
+
+<section id="ensinar">
+<h2>11. Como ensinar em 3 minutos</h2>
+<p>Leia em voz alta, sem pressa. O site também tem esse guia, com figuras, no botão <b>Como jogar</b>.</p>
+<ol class="steps">
+  <li>“Dois de nós são cúmplices. O celular sorteia em segredo. Os dois sabem quem é a dupla. O resto é detetive.” <span class="muted">(30 segundos)</span></li>
+  <li>“A cada rodada aparece uma pergunta boba com três respostas. Todo mundo responde ao mesmo tempo, em silêncio.” <span class="muted">(30 segundos)</span></li>
+  <li>“Depois o celular mostra as respostas e diz só uma coisa: se os dois cúmplices responderam igual. Cada IGUAL é um ponto para eles. Eles não podem combinar nada: precisam pensar igual.” <span class="muted">(45 segundos)</span></li>
+  <li>“A partir da segunda pergunta, quem desconfiar propõe uma dupla e todos votam. Se mais da metade disser sim, o celular revela. Acertou, os detetives ganham. Errou, os cúmplices ganham um ponto.” <span class="muted">(45 segundos)</span></li>
+  <li>“Os cúmplices ganham se chegarem à meta que aparece na tela. Os detetives ganham se acharem a dupla ou se as perguntas acabarem antes.” <span class="muted">(30 segundos)</span></li>
+</ol>
+<p>Depois, comecem com a <b>pergunta de treino</b> ligada.</p>
+</section>
+
+<section id="simulacoes">
+<h2>12. Por que essas metas?</h2>
+<p>Antes de fechar as regras, foram simuladas {{SIMULACAO_TOTAL}} partidas com o mesmo motor que roda no site. Robôs fizeram o papel de mesas atentas (usam o histórico todo), normais, cautelosas e afobadas, e de cúmplices com mais ou menos sintonia.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Pessoas</th><th>Meta</th><th>Cúmplices vencem: mesa atenta</th><th>normal</th><th>cautelosa</th><th>afobada</th><th>Perguntas por partida</th></tr></thead>
+  <tbody>{{SIMULACAO}}</tbody>
+</table></div>
+<ul>
+  <li>Nenhuma partida travou nem passou do limite de perguntas. Os pontos sempre bateram: IGUAIS mais acusações erradas.</li>
+  <li>Com 5 pessoas, quase uma partida em cada cinco acabava na primeira pergunta. Por isso, na primeira pergunta ninguém acusa.</li>
+  <li>Com 3 ou 4 pessoas, os detetives nunca chegariam à maioria, e os cúmplices venceriam de 64% a 98% das vezes. Por isso o mínimo é 5.</li>
+  <li>Numa mesa atenta, os cúmplices vencem perto de 4 em cada 10 partidas; numa mesa normal, perto de metade. Quem deduz melhor ganha mais, e quem acusa com pressa perde mais.</li>
+</ul>
+</section>
+
+<section id="resumo-sec">
+<h2>13. Resumo de uma página</h2>
+<p class="noprint"><button class="btn" type="button" data-print="resumo">Imprimir só o resumo</button></p>
+<div class="resumo">
+  <div class="top"><span class="mark" aria-hidden="true" style="font-size:1.8rem"><i></i><i></i></span><span class="stamp">Cúmplices</span><span class="muted">Para 5 a 12 pessoas, a partir de 10 anos</span></div>
+  <div class="grid">
+    <div>
+      <h3>Objetivo</h3>
+      <p>Dois jogadores secretos, os <b>cúmplices</b>, tentam responder igual sem combinar. Os <b>detetives</b> tentam descobrir a dupla.</p>
+      <h3>Preparação</h3>
+      <p>O anfitrião cria a sala; os outros entram pelo código, link ou QR. Cada um segura o botão para ver o papel. Os cúmplices veem a sua dupla.</p>
+      <h3>A cada pergunta</h3>
+      <ol>
+        <li><b>Respondam em silêncio:</b> A, B ou C.</li>
+        <li><b>Revelação:</b> todas as respostas aparecem. IGUAL = os cúmplices escolheram a mesma: +1 ponto para eles.</li>
+        <li><b>Conversem.</b> Vale mentir. Não vale mostrar a tela.</li>
+        <li><b>Acusem</b> (da 2ª pergunta em diante): alguém propõe uma dupla e todos votam. Mais da metade diz sim: o celular revela. Certa: detetives vencem. Errada: +1 ponto para os cúmplices.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Fim</h3>
+      <p><b>Cúmplices</b> vencem ao chegar à meta. <b>Detetives</b> vencem acusando a dupla certa ou se as perguntas acabarem antes.</p>
+      <table><thead><tr><th>Pessoas</th><th>Meta</th></tr></thead><tbody>{{TABELA_CURTA}}</tbody></table>
+      <p class="small">Sins para aprovar uma acusação (pessoas→sins): {{MAIORIA_LINHA}}.</p>
+      <h3>Lembretes</h3>
+      <ul>
+        <li>Cada um propõe no máximo 1 acusação por pergunta.</li>
+        <li>Dupla inocentada não pode ser acusada de novo.</li>
+        <li>Quem não responde fica sem resposta (cúmplice sem resposta = DIFERENTE).</li>
+        <li>Sem celular: um narrador lê a pergunta, todos mostram 1, 2 ou 3 dedos juntos e ele anuncia IGUAL ou DIFERENTE.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="perguntas">
+<h2>14. Lista de perguntas</h2>
+<p>As {{PERGUNTAS}} perguntas do site, para o modo com narrador ou para inspirar perguntas da casa.</p>
+<details class="qs"><summary>Mostrar todas as perguntas</summary>
+<ol class="qlist">{{LISTA_PERGUNTAS}}</ol>
+</details>
+</section>
+
+<footer>
+<p>Cúmplices é um jogo original. Fontes Rubik e Rubik Dirt (SIL Open Font License). <a href="./">Voltar para o jogo</a>.</p>
+</footer>
+</main>
+<script>
+document.addEventListener('click', function (ev) {
+  var b = ev.target.closest('[data-print]');
+  if (!b) return;
+  if (b.getAttribute('data-print') === 'resumo') {
+    document.body.classList.add('so-resumo');
+    var off = function () { document.body.classList.remove('so-resumo'); window.removeEventListener('afterprint', off); };
+    window.addEventListener('afterprint', off);
+    window.print();
+    setTimeout(off, 1500);
+  } else {
+    window.print();
+  }
+});
+</script>
+</body>
+</html>

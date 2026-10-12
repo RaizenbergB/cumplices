@@ -1,0 +1,166 @@
+{
+ "games": 4000,
+ "rows": [
+  {
+   "n": 5,
+   "meta": 3,
+   "rodadas": 5,
+   "atenta": 35,
+   "rodadasMedia": 2.6,
+   "rodadasMax": 5,
+   "acusacoesPorPartida": 1.2,
+   "fins": {
+    "acusacao": 63,
+    "acusacao-errada": 21,
+    "meta": 14,
+    "rodadas": 2
+   },
+   "normal": 49,
+   "cautelosa": 21,
+   "afobada": 47,
+   "sintonia fraca": 23,
+   "sintonia forte": 46
+  },
+  {
+   "n": 6,
+   "meta": 3,
+   "rodadas": 5,
+   "atenta": 43,
+   "rodadasMedia": 2.9,
+   "rodadasMax": 5,
+   "acusacoesPorPartida": 1.3,
+   "fins": {
+    "acusacao": 53,
+    "rodadas": 5,
+    "meta": 14,
+    "acusacao-errada": 29
+   },
+   "normal": 60,
+   "cautelosa": 36,
+   "afobada": 62,
+   "sintonia fraca": 29,
+   "sintonia forte": 56
+  },
+  {
+   "n": 7,
+   "meta": 3,
+   "rodadas": 4,
+   "atenta": 44,
+   "rodadasMedia": 3.1,
+   "rodadasMax": 4,
+   "acusacoesPorPartida": 1,
+   "fins": {
+    "acusacao": 31,
+    "acusacao-errada": 28,
+    "rodadas": 25,
+    "meta": 16
+   },
+   "normal": 49,
+   "cautelosa": 36,
+   "afobada": 59,
+   "sintonia fraca": 25,
+   "sintonia forte": 66
+  },
+  {
+   "n": 8,
+   "meta": 3,
+   "rodadas": 4,
+   "atenta": 45,
+   "rodadasMedia": 3.3,
+   "rodadasMax": 4,
+   "acusacoesPorPartida": 0.8,
+   "fins": {
+    "acusacao-errada": 24,
+    "meta": 20,
+    "rodadas": 34,
+    "acusacao": 21
+   },
+   "normal": 49,
+   "cautelosa": 41,
+   "afobada": 56,
+   "sintonia fraca": 28,
+   "sintonia forte": 73
+  },
+  {
+   "n": 9,
+   "meta": 4,
+   "rodadas": 7,
+   "atenta": 42,
+   "rodadasMedia": 4.3,
+   "rodadasMax": 7,
+   "acusacoesPorPartida": 1.4,
+   "fins": {
+    "acusacao": 56,
+    "rodadas": 2,
+    "acusacao-errada": 27,
+    "meta": 15
+   },
+   "normal": 52,
+   "cautelosa": 35,
+   "afobada": 56,
+   "sintonia fraca": 25,
+   "sintonia forte": 61
+  },
+  {
+   "n": 10,
+   "meta": 4,
+   "rodadas": 7,
+   "atenta": 45,
+   "rodadasMedia": 4.5,
+   "rodadasMax": 7,
+   "acusacoesPorPartida": 1.4,
+   "fins": {
+    "meta": 17,
+    "acusacao-errada": 28,
+    "acusacao": 51,
+    "rodadas": 5
+   },
+   "normal": 57,
+   "cautelosa": 40,
+   "afobada": 59,
+   "sintonia fraca": 27,
+   "sintonia forte": 65
+  },
+  {
+   "n": 11,
+   "meta": 4,
+   "rodadas": 6,
+   "atenta": 45,
+   "rodadasMedia": 4.6,
+   "rodadasMax": 6,
+   "acusacoesPorPartida": 1.1,
+   "fins": {
+    "acusacao-errada": 26,
+    "acusacao": 37,
+    "rodadas": 18,
+    "meta": 18
+   },
+   "normal": 49,
+   "cautelosa": 39,
+   "afobada": 55,
+   "sintonia fraca": 25,
+   "sintonia forte": 71
+  },
+  {
+   "n": 12,
+   "meta": 4,
+   "rodadas": 6,
+   "atenta": 47,
+   "rodadasMedia": 4.8,
+   "rodadasMax": 6,
+   "acusacoesPorPartida": 1,
+   "fins": {
+    "rodadas": 22,
+    "meta": 23,
+    "acusacao": 30,
+    "acusacao-errada": 25
+   },
+   "normal": 52,
+   "cautelosa": 44,
+   "afobada": 55,
+   "sintonia fraca": 25,
+   "sintonia forte": 75
+  }
+ ],
+ "total": 192000
+}

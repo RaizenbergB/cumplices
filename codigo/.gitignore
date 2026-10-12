@@ -1,3 +1,4 @@
 node_modules/
+kit-build/
 __pycache__/
 *.pyc

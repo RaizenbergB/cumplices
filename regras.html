@@ -23,20 +23,474 @@
 <link rel="preload" href="fontes/rubik-800.woff2" as="font" type="font/woff2" crossorigin>
 
 <style>
-@font-face{font-family:'Rubik';font-weight:400;font-display:swap;src:url('fontes/rubik-400.woff2') format('woff2')}
-@font-face{font-family:'Rubik';font-weight:800;font-display:swap;src:url('fontes/rubik-800.woff2') format('woff2')}
-body{margin:0;background:#f3f5f9;color:#171b2e;font:17px/1.55 'Rubik',system-ui,sans-serif}
-main{max-width:40rem;margin:0 auto;padding:24px 16px 64px}
-h1{font-weight:800;font-size:2rem;margin:0 0 8px}
-table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border-bottom:1px solid #d8dde8;padding:6px 4px;text-align:left}
-a{color:#2f5db5;font-weight:700}
-@media (prefers-color-scheme:dark){body{background:#0f121c;color:#eceef5}td,th{border-color:#2b3144}a{color:#7aa2f7}}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:400;font-display:swap;src:url('fontes/rubik-400.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:500;font-display:swap;src:url('fontes/rubik-500.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:700;font-display:swap;src:url('fontes/rubik-700.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:800;font-display:swap;src:url('fontes/rubik-800.woff2') format('woff2')}
+@font-face{font-family:'Rubik Dirt';font-style:normal;font-weight:400;font-display:swap;src:url('fontes/rubik-dirt-carimbo.woff2') format('woff2')}
+:root{
+  --paper:#f3f5f9;--surface:#fff;--ink:#171b2e;--muted:#5b6276;--line:#d8dde8;--soft:#e8ecf3;
+  --pair:#d94e1a;--pair-soft:#fbe3d7;--det:#2f5db5;--det-soft:#dfe7f7;
+  --a:#0b7f72;--a-soft:#d7f0ec;--b:#a87100;--b-soft:#f7ebcb;--c:#95307a;--c-soft:#f3dbeb;
+  --body:'Rubik',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;--stamp:'Rubik Dirt','Rubik',Impact,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme='light']){
+  --paper:#0f121c;--surface:#181c29;--ink:#eceef5;--muted:#a1a8bc;--line:#2b3144;--soft:#222738;
+  --pair:#ff7a45;--pair-soft:#3a2117;--det:#7aa2f7;--det-soft:#1a2540;
+  --a:#39c3b2;--a-soft:#12302c;--b:#edb53a;--b-soft:#33280f;--c:#dd72c0;--c-soft:#34192d;color-scheme:dark}}
+:root[data-theme='dark']{--paper:#0f121c;--surface:#181c29;--ink:#eceef5;--muted:#a1a8bc;--line:#2b3144;--soft:#222738;
+  --pair:#ff7a45;--pair-soft:#3a2117;--det:#7aa2f7;--det-soft:#1a2540;--a:#39c3b2;--a-soft:#12302c;--b:#edb53a;--b-soft:#33280f;--c:#dd72c0;--c-soft:#34192d;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 var(--body)}
+main{max-width:42rem;margin:0 auto;padding:20px 16px 72px}
+h1,h2,h3{line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;padding-top:12px;border-top:3px solid var(--ink)}
+h3{font-size:1.125rem;font-weight:800;margin-top:24px}
+p,ul,ol{margin:10px 0 0}
+ul,ol{padding-left:1.4em}
+li+li{margin-top:6px}
+a{color:var(--det);font-weight:700;overflow-wrap:anywhere}
+b,strong{font-weight:700}
+.mark{display:inline-flex;font-size:2.4rem}
+.mark i{width:1em;height:1em;border-radius:50%;background:var(--pair);display:block}
+.mark i+i{margin-left:-.42em;background:var(--det);mix-blend-mode:multiply}
+@media (prefers-color-scheme:dark){.mark i+i{mix-blend-mode:screen}}
+.stamp{display:inline-block;font-family:var(--stamp);text-transform:uppercase;line-height:1;padding:.14em .32em .07em;border:.08em solid currentColor;border-radius:.14em;transform:rotate(-4deg);white-space:nowrap}
+.logo{font-size:clamp(2.3rem,11vw,3.2rem);color:var(--pair);margin:10px 0 6px 6px;transform-origin:left center}
+.s-igual{color:var(--pair);font-size:1.05em;transform:rotate(-3deg)}
+.s-dif{color:var(--det);font-size:1.05em;transform:rotate(-3deg)}
+.s-small{font-size:.95em}
+.sub{font-size:1.25rem;font-weight:500;margin-top:14px;max-width:28ch}
+.facts{margin-top:14px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 16px;border-radius:14px;border:2px solid var(--ink);color:var(--ink);background:transparent;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper)}
+nav.toc{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+nav.toc ol{columns:2 14rem;column-gap:24px;margin:6px 0 0}
+nav.toc li{break-inside:avoid;margin:0 0 4px}
+nav.toc a{font-weight:500;color:var(--ink)}
+.callout{margin-top:14px;border-radius:14px;padding:12px 14px;background:var(--b-soft)}
+.callout.no{background:var(--pair-soft)}
+.callout.ok{background:var(--a-soft)}
+.case{margin-top:14px;border-left:4px solid var(--det);padding:4px 0 4px 14px}
+.case h4{margin:0;font-size:1rem}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.875rem;color:var(--muted);font-weight:700}
+.tablewrap{overflow-x:auto}
+.ways td:first-child{font-weight:700;white-space:nowrap}
+.steps{counter-reset:p;list-style:none;padding:0}
+.steps>li{counter-increment:p;position:relative;padding-left:44px;margin-top:14px}
+.steps>li::before{content:counter(p);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:800;font-size:.95rem}
+.opt{display:inline-flex;align-items:center;justify-content:center;width:1.5em;height:1.5em;border-radius:.35em;font-weight:800;font-size:.85em;color:#fff;vertical-align:.08em}
+.oa{background:var(--a)}.ob{background:var(--b)}.oc{background:var(--c)}
+.faq dt{font-weight:700;margin-top:16px}
+.faq dd{margin:4px 0 0}
+details.qs{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+details.qs summary{font-weight:700;cursor:pointer}
+.qlist{columns:2 18rem;column-gap:28px;font-size:.9375rem;padding-left:1.6em}
+.qlist li{break-inside:avoid}
+.qlist span{color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+/* Resumo de uma página */
+.resumo{margin-top:16px;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:18px}
+.resumo h3{margin-top:14px}
+.resumo .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.resumo .top .stamp{font-size:1.9rem;color:var(--pair)}
+.resumo .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:4px 22px}
+.resumo p,.resumo li{font-size:.95rem}
+.resumo table{font-size:.9rem}
+footer{margin-top:48px;color:var(--muted);font-size:.875rem}
+:focus-visible{outline:3px solid var(--det);outline-offset:2px}
+@media print{
+  @page{size:A4;margin:14mm 14mm 16mm}
+  body{background:#fff;color:#000;font-size:10.5pt;line-height:1.45}
+  main{max-width:none;padding:0}
+  .actions,nav.toc,.noprint{display:none!important}
+  h2{margin-top:22px;break-after:avoid}
+  h3{break-after:avoid}
+  table,.case,.callout,.faq dd{break-inside:avoid}
+  details.qs{border:0;padding:0}
+  details.qs:not([open]) > :not(summary){display:block}
+  #resumo-sec{break-before:page}
+  body.so-resumo main > :not(#resumo-sec){display:none!important}
+  body.so-resumo #resumo-sec{break-before:auto;border:0;margin:0;padding:0}
+  body.so-resumo #resumo-sec > h2{display:none}
+  .resumo{border:1.5pt solid #000;border-radius:10pt;padding:12pt}
+  a{color:#000;text-decoration:none}
+}
 </style>
 </head>
-<body><main>
-<h1>Regras do Cúmplices</h1>
-<p>O livro de regras completo chega em instantes. Enquanto isso, use o <a href="./">Como jogar</a> dentro do jogo.</p>
-<table><thead><tr><th>Pessoas</th><th>Meta</th><th>Perguntas</th><th>Mais fácil</th><th>Mais difícil</th></tr></thead><tbody><tr><td>5 ou 6</td><td><b>3 IGUAIS</b></td><td>até 5</td><td>2 em até 4</td><td>3 em até 4</td></tr><tr><td>7 ou 8</td><td><b>3 IGUAIS</b></td><td>até 4</td><td>3 em até 5</td><td>4 em até 6</td></tr><tr><td>9 ou 10</td><td><b>4 IGUAIS</b></td><td>até 7</td><td>3 em até 5</td><td>4 em até 5</td></tr><tr><td>11 ou 12</td><td><b>4 IGUAIS</b></td><td>até 6</td><td>3 em até 5</td><td>4 em até 5</td></tr></tbody></table>
-<table hidden><tr><td>5 ou 6</td><td><b>3 IGUAIS</b> em até 5 perguntas</td></tr><tr><td>7 ou 8</td><td><b>3 IGUAIS</b> em até 4 perguntas</td></tr><tr><td>9 ou 10</td><td><b>4 IGUAIS</b> em até 7 perguntas</td></tr><tr><td>11 ou 12</td><td><b>4 IGUAIS</b> em até 6 perguntas</td></tr><tr><td>5</td><td>3</td></tr><tr><td>6</td><td>4</td></tr><tr><td>7</td><td>4</td></tr><tr><td>8</td><td>5</td></tr><tr><td>9</td><td>5</td></tr><tr><td>10</td><td>6</td></tr><tr><td>11</td><td>6</td></tr><tr><td>12</td><td>7</td></tr></table>
-<p hidden>https://raizenbergb.github.io/cumplices/ 220 segunda</p>
-</main></body></html>
+<body>
+<main>
+<header>
+  <span class="mark" aria-hidden="true"><i></i><i></i></span>
+  <h1><span class="stamp logo">Cúmplices</span><br><span class="muted" style="font-size:1.125rem;font-weight:700">Livro de regras</span></h1>
+  <p class="sub">Dois de vocês pensam igual. O resto tem que descobrir quem.</p>
+  <p class="facts">Para 5 a 12 pessoas, a partir de 10 anos. Cada partida leva uns 10 minutos. Para aprender, 3 minutos.</p>
+  <div class="actions">
+    <a class="btn primary" href="./">Jogar agora</a>
+    <a class="btn" href="kit/cumplices-kit-para-imprimir.pdf">Kit para imprimir (PDF)</a>
+    <button class="btn" type="button" data-print="resumo">Imprimir o resumo</button>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sumário">
+  <b>Sumário</b>
+  <ol>
+    <li><a href="#visao">Visão geral</a></li>
+    <li><a href="#precisa">O que vocês precisam</a></li>
+    <li><a href="#preparacao">Preparação</a></li>
+    <li><a href="#rodada">Como funciona uma rodada</a></li>
+    <li><a href="#fim">Fim de jogo e pontuação</a></li>
+    <li><a href="#exemplo">Exemplo de partida</a></li>
+    <li><a href="#duvidas">Dúvidas e casos especiais</a></li>
+    <li><a href="#variantes">Variantes</a></li>
+    <li><a href="#narrador">Sem celular: com narrador</a></li>
+    <li><a href="#dicas">Dicas</a></li>
+    <li><a href="#ensinar">Como ensinar em 3 minutos</a></li>
+    <li><a href="#simulacoes">Por que essas metas?</a></li>
+    <li><a href="#resumo-sec">Resumo de uma página</a></li>
+    <li><a href="#perguntas">Lista de perguntas</a></li>
+  </ol>
+</nav>
+
+<section id="visao">
+<h2>1. Visão geral</h2>
+<p>No começo, o jogo sorteia em segredo <b>dois cúmplices</b>. Os dois sabem quem é a sua dupla. Todo o resto é <b>detetive</b> e não sabe de nada.</p>
+<p>A cada rodada aparece uma pergunta boba com três respostas. Por exemplo: “Qual é o melhor salgado de festa? Coxinha, empada ou quibe?”. Todo mundo responde ao mesmo tempo, em silêncio.</p>
+<p>Depois, todas as respostas aparecem. O jogo conta só uma coisa: os dois cúmplices responderam <span class="stamp s-igual s-small">igual</span> ou <span class="stamp s-dif s-small">diferente</span>?</p>
+<ul>
+  <li>Os <b>cúmplices</b> querem responder igual muitas vezes, sem combinar nada e sem dar bandeira.</li>
+  <li>Os <b>detetives</b> querem descobrir a dupla antes disso.</li>
+</ul>
+<p>Ninguém é eliminado. Todo mundo responde todas as perguntas e vota em todas as acusações.</p>
+</section>
+
+<section id="precisa">
+<h2>2. O que vocês precisam</h2>
+<p>Escolha um dos três jeitos de jogar. As regras são as mesmas.</p>
+<div class="tablewrap"><table class="ways">
+  <thead><tr><th>Jeito</th><th>Precisa de</th><th>Bom para</th></tr></thead>
+  <tbody>
+    <tr><td>Cada um no seu celular</td><td>1 celular com internet por pessoa. Mais nada.</td><td>Mesa ou chamada de vídeo</td></tr>
+    <tr><td>Um celular só</td><td>1 celular, que passa de mão em mão no começo. Depois que o site abre, não precisa de internet.</td><td>Mesa com internet ruim</td></tr>
+    <tr><td>Sem celular</td><td>1 narrador que não joga, papel, caneta e um baralho comum. Ou o kit impresso.</td><td>Hoje mesmo, sem nada</td></tr>
+  </tbody>
+</table></div>
+<p><b>Kit para imprimir (opcional):</b> 10 folhas A4 em tamanho real, com linhas de corte. São 12 credenciais (2 de cúmplice e 10 de detetive), 60 cartas de pergunta, a folha do narrador e o resumo de uma página. As cartas têm 63 × 88 mm, o tamanho de carta de baralho. <a href="kit/cumplices-kit-para-imprimir.pdf">Baixar o kit</a>.</p>
+</section>
+
+<section id="preparacao">
+<h2>3. Preparação</h2>
+<p>Com cada um no seu celular, a preparação leva um minuto.</p>
+<ol class="steps">
+  <li>Uma pessoa abre <a href="https://raizenbergb.github.io/cumplices/">https://raizenbergb.github.io/cumplices/</a> e toca em <b>Criar sala</b>. Ela é o <b>anfitrião</b>: o celular dela guarda a partida e precisa ficar com a tela acesa até o fim.</li>
+  <li>Os outros abrem o site, tocam em <b>Entrar numa sala</b> e digitam o código de 4 letras. Também dá para entrar pelo link (botão <b>Copiar link</b>) ou apontando a câmera para o QR code na tela do anfitrião.</li>
+  <li>Com 5 a 12 pessoas na sala, o anfitrião toca em <b>Começar partida</b>.</li>
+  <li>Cada um <b>segura o botão</b> para ver o seu papel e solta para esconder. Os cúmplices veem o nome da sua dupla.</li>
+</ol>
+<div class="callout no"><b>Não vale:</b> mostrar a tela, espiar a tela dos outros ou combinar sinais, nem antes da partida.</div>
+</section>
+
+<section id="rodada">
+<h2>4. Como funciona uma rodada</h2>
+<p>Cada rodada é uma pergunta e tem quatro passos.</p>
+
+<h3>Passo 1: responder em silêncio</h3>
+<p>A pergunta aparece com três respostas: <span class="opt oa">A</span> <span class="opt ob">B</span> e <span class="opt oc">C</span>. Cada um toca na sua. Dá para trocar até a última pessoa responder.</p>
+<p>Desde a hora em que a pergunta aparece até a revelação, <b>ninguém fala nada sobre as respostas</b>.</p>
+<ul>
+  <li><b>Cúmplice:</b> tente escolher a mesma resposta da sua dupla, sem combinar.</li>
+  <li><b>Detetive:</b> responda o que quiser. Veja nas <a href="#dicas">dicas</a> como a sua resposta pode ajudar a mesa.</li>
+</ul>
+
+<h3>Passo 2: revelação</h3>
+<p>Quando todos respondem, o celular mostra quem escolheu o quê e dá um carimbo:</p>
+<ul>
+  <li><span class="stamp s-igual s-small">igual</span>: os dois cúmplices escolheram a mesma resposta. Eles ganham <b>1 ponto</b>.</li>
+  <li><span class="stamp s-dif s-small">diferente</span>: escolheram respostas diferentes. Nada acontece.</li>
+</ul>
+<p>O celular nunca diz quem são os cúmplices. Ele só diz se a dupla respondeu igual.</p>
+
+<h3>Passo 3: conversa</h3>
+<p>Agora vale tudo: perguntar, desconfiar, defender, se fazer de bobo e até mentir. “Por que você escolheu ficar sem banho?” “Vocês dois responderam junto de novo!”</p>
+<p>O histórico, na tela, mostra as respostas de todas as perguntas.</p>
+
+<h3>Passo 4: acusação (a partir da segunda pergunta)</h3>
+<p>Na primeira pergunta ninguém acusa: é só para observar.</p>
+<p>Da segunda em diante, qualquer jogador pode <b>propor uma acusação</b>: escolhe as duas pessoas que acha que são os cúmplices. Então <b>todos votam ao mesmo tempo</b>, sim ou não, inclusive quem propôs e os acusados.</p>
+<p>A acusação é <b>aprovada</b> se mais da metade da mesa disser sim:</p>
+<div class="tablewrap"><table style="max-width:20rem">
+  <thead><tr><th>Pessoas na mesa</th><th>Sins necessários</th></tr></thead>
+  <tbody><tr><td>5</td><td>3</td></tr><tr><td>6</td><td>4</td></tr><tr><td>7</td><td>4</td></tr><tr><td>8</td><td>5</td></tr><tr><td>9</td><td>5</td></tr><tr><td>10</td><td>6</td></tr><tr><td>11</td><td>6</td></tr><tr><td>12</td><td>7</td></tr></tbody>
+</table></div>
+<ul>
+  <li><b>Aprovada e certa:</b> os detetives vencem na hora.</li>
+  <li><b>Aprovada e errada:</b> o celular carimba <span class="stamp s-dif s-small">inocentes</span>. Os cúmplices ganham <b>1 ponto</b>, essa dupla não pode ser acusada de novo e a rodada acaba.</li>
+  <li><b>Recusada:</b> nada acontece. A conversa continua e outra pessoa pode propor outra acusação.</li>
+</ul>
+<p>Cada pessoa pode propor <b>uma acusação por pergunta</b>. Quando a mesa quiser seguir, cada um toca em <b>Pronto para a próxima</b>. O anfitrião também pode passar adiante.</p>
+</section>
+
+<section id="fim">
+<h2>5. Fim de jogo e pontuação</h2>
+<p>Os cúmplices ganham pontos de dois jeitos: a cada <b>IGUAL</b> e a cada <b>acusação errada aprovada</b>.</p>
+<ul>
+  <li><b>Os cúmplices vencem</b> assim que chegam à meta.</li>
+  <li><b>Os detetives vencem</b> se acusarem a dupla certa, ou se as perguntas acabarem antes de os cúmplices chegarem à meta.</li>
+</ul>
+<p>A meta e o número de perguntas dependem de quantas pessoas jogam. O site já usa a linha certa.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Pessoas</th><th>Meta dos cúmplices</th><th>Perguntas</th><th>Opção “mais fácil”</th><th>Opção “mais difícil”</th></tr></thead>
+  <tbody><tr><td>5 ou 6</td><td><b>3 IGUAIS</b></td><td>até 5</td><td>2 em até 4</td><td>3 em até 4</td></tr><tr><td>7 ou 8</td><td><b>3 IGUAIS</b></td><td>até 4</td><td>3 em até 5</td><td>4 em até 6</td></tr><tr><td>9 ou 10</td><td><b>4 IGUAIS</b></td><td>até 7</td><td>3 em até 5</td><td>4 em até 5</td></tr><tr><td>11 ou 12</td><td><b>4 IGUAIS</b></td><td>até 6</td><td>3 em até 5</td><td>4 em até 5</td></tr></tbody>
+</table></div>
+<p>A última pergunta termina na revelação: se ali os cúmplices não chegarem à meta, os detetives vencem. No fim, o celular revela a dupla e mostra o histórico completo.</p>
+<div class="callout ok"><b>Placar da noite (opcional).</b> Jogando várias partidas seguidas, o site soma pontos: cada detetive do time vencedor ganha 1 e cada cúmplice vencedor ganha 2. Como os papéis são sorteados de novo a cada partida, quem está atrás sempre pode virar.</div>
+</section>
+
+<section id="exemplo">
+<h2>6. Exemplo de partida</h2>
+<p>Seis amigos: Ana, Bia, Caio, Duda, Edu e Fê. Com 6 pessoas, a meta é 3 IGUAIS em até 5 perguntas. Os cúmplices sorteados são <b>Caio e Fê</b>, mas só eles sabem disso.</p>
+
+<div class="case"><h4>Pergunta 1: “Miojo é: (A) comida de verdade, (B) lanche de emergência ou (C) um crime?”</h4>
+<p>Ana e Duda escolhem A. Bia, Caio, Edu e Fê escolhem B. Ninguém escolhe C.</p>
+<p>Carimbo: <span class="stamp s-igual s-small">igual</span>. Os cúmplices ganham 1 ponto (1 de 3).</p>
+<p>A mesa conversa: “A dupla está entre os quatro do B… ou são a Ana e a Duda!” Na primeira pergunta ninguém acusa.</p></div>
+
+<div class="case"><h4>Pergunta 2: “Melhor superpoder: (A) voar, (B) ficar invisível ou (C) ler mentes?”</h4>
+<p>Ana e Caio: A. Bia e Fê: B. Duda e Edu: C.</p>
+<p>Carimbo: <span class="stamp s-dif s-small">diferente</span>. Sem ponto.</p>
+<p>Bia propõe: “Acuso a Ana e a Duda. Responderam juntas na primeira!” Votação: Bia, Caio, Edu e Fê dizem sim; Ana e Duda dizem não. São 4 sins de 6: aprovada.</p>
+<p>O celular revela: <span class="stamp s-dif s-small">inocentes</span>. Os cúmplices ganham 1 ponto (2 de 3) e a rodada acaba. Repare: Caio e Fê votaram sim numa acusação errada. Isso fica no histórico.</p></div>
+
+<div class="case"><h4>Pergunta 3: “Pior castigo: (A) uma semana sem internet, (B) sem doce ou (C) sem banho?”</h4>
+<p>Ana, Bia e Duda: A. Caio e Edu: B. Fê: C.</p>
+<p>Carimbo: <span class="stamp s-dif s-small">diferente</span>.</p>
+<p>Edu pensa alto: “Caio e Fê responderam igual na 1ª e diferente na 2ª e na 3ª. Bate com os três carimbos. E os dois votaram sim contra a Ana e a Duda.” Ele propõe: “Acuso o Caio e a Fê.”</p>
+<p>Ana, Bia, Duda e Edu dizem sim: 4 de 6, aprovada. O celular revela que eram mesmo Caio e Fê: <span class="stamp s-dif s-small">detetives venceram</span></p></div>
+<p>Se o Edu tivesse errado, os cúmplices ganhariam o terceiro ponto e venceriam ali mesmo. Por isso toda acusação é um risco.</p>
+</section>
+
+<section id="duvidas">
+<h2>7. Dúvidas frequentes e casos especiais</h2>
+<dl class="faq">
+  <dt>Por que o mínimo é 5 pessoas?</dt>
+  <dd>Para aprovar uma acusação, mais da metade da mesa precisa dizer sim, e os dois cúmplices sempre podem dizer não. Com 4 pessoas, os 2 detetives nunca chegariam aos 3 votos. Com 5, os 3 detetives precisam concordar.</dd>
+  <dt>Os cúmplices podem combinar alguma coisa?</dt>
+  <dd>Não. Nada de sinal, código, piscada ou acordo, nem antes da partida. O desafio é pensar igual sem combinar.</dd>
+  <dt>Pode mentir?</dt>
+  <dd>Na conversa, sim. Todo mundo pode dizer o que quiser. Só não vale mostrar a tela.</dd>
+  <dt>Pode falar enquanto as pessoas respondem?</dt>
+  <dd>Não. É silêncio desde a pergunta até a revelação. Se alguém falar e atrapalhar, o anfitrião troca a pergunta.</dd>
+  <dt>Dá para mudar a resposta?</dt>
+  <dd>Sim, até a última pessoa responder. Aí a revelação acontece sozinha.</dd>
+  <dt>Os cúmplices podem acusar e votar sim nas acusações?</dt>
+  <dd>Podem. Votar sim numa acusação errada dá ponto para eles, mas fica registrado.</dd>
+  <dt>Pode acusar a si mesmo?</dt>
+  <dd>Não. O celular não deixa escolher o próprio nome.</dd>
+  <dt>Pode acusar de novo uma dupla inocentada?</dt>
+  <dd>Essa mesma dupla, não. Mas cada uma dessas pessoas ainda pode ser acusada junto com outra.</dd>
+  <dt>E se der empate na votação da acusação?</dt>
+  <dd>Não aprova. Precisa de mais da metade da mesa dizendo sim. Com 6 pessoas, 3 sins não bastam.</dd>
+  <dt>Quantas acusações cabem numa pergunta?</dt>
+  <dd>Cada pessoa pode propor uma. Se uma acusação errada for aprovada, a pergunta acaba na hora.</dd>
+  <dt>E se todo mundo escolher a mesma resposta?</dt>
+  <dd>O carimbo diz IGUAL, porque a dupla está ali, mas ninguém descobre nada. Ótimo para os cúmplices.</dd>
+  <dt>Os cúmplices responderam igual por acaso. Vale?</dt>
+  <dd>Vale. O carimbo só olha as respostas.</dd>
+  <dt>Alguém não responde e a partida trava.</dt>
+  <dd>O anfitrião toca em <b>Encerrar votação agora</b>. Quem não respondeu fica sem resposta. Se for um cúmplice, conta como DIFERENTE.</dd>
+  <dt>Alguém não vota na acusação.</dt>
+  <dd>O anfitrião pode encerrar a votação. Quem não votou conta como “não”.</dd>
+  <dt>A pergunta ficou confusa, ou alguém falou sem querer.</dt>
+  <dd>Antes da revelação, o anfitrião toca em <b>Trocar pergunta</b>. Vem outra, e as respostas dadas são apagadas.</dd>
+  <dt>O celular de alguém caiu ou a internet piscou.</dt>
+  <dd>Ele volta sozinho em alguns segundos. Se não voltar, é só abrir o link de novo: a pessoa volta para o mesmo lugar, com o mesmo papel e as mesmas respostas.</dd>
+  <dt>Alguém trocou de celular no meio da partida.</dt>
+  <dd>Entre na sala com o mesmo nome. Se o celular antigo estiver desconectado, a pessoa recupera o lugar.</dd>
+  <dt>O celular do anfitrião bloqueou ou a página recarregou.</dt>
+  <dd>Abra o site de novo e toque em <b>Voltar para a sala</b>. A partida continua de onde parou, com o mesmo código, e todos voltam sozinhos. Dica: deixe o anfitrião num celular carregando. O site tenta manter a tela acesa.</dd>
+  <dt>Alguém precisa ir embora.</dt>
+  <dd>O anfitrião toca em <b>Encerrar partida</b> e começa outra sem a pessoa. As partidas são rápidas.</dd>
+  <dt>Alguém viu o papel de outra pessoa sem querer.</dt>
+  <dd>Encerrem a partida e comecem outra.</dd>
+  <dt>Chegou alguém no meio da partida.</dt>
+  <dd>A pessoa entra na sala e assiste. Ela joga a partir da próxima partida.</dd>
+  <dt>E se aparecerem mais de 12 pessoas?</dt>
+  <dd>A sala aceita até 12. Com mais gente, façam duas salas, ou revezem: quem fica de fora entra na próxima.</dd>
+  <dt>Dá para jogar à distância?</dt>
+  <dd>Sim. Façam uma chamada de vídeo ou de voz e cada um entra na sala pelo próprio celular.</dd>
+  <dt>Precisa de internet?</dt>
+  <dd>Com cada um no seu celular, sim. No modo um celular só, basta abrir o site uma vez com internet.</dd>
+  <dt>As perguntas repetem?</dt>
+  <dd>São 220 perguntas. O celular do anfitrião evita repetir até usar todas.</dd>
+  <dt>Dá para trapacear pelo código do site?</dt>
+  <dd>Quem entende de programação até conseguiria. É jogo entre amigos: combinem que não vale.</dd>
+</dl>
+</section>
+
+<section id="variantes">
+<h2>8. Variantes</h2>
+<h3>Para iniciantes: pergunta de treino</h3>
+<p>Ligue <b>Pergunta de treino</b> nas opções da sala. A primeira pergunta não vale ponto e ninguém acusa: serve para todo mundo ver como funciona. Na primeira partida da turma, alguém lê em voz alta o <a href="#ensinar">roteiro de 3 minutos</a>.</p>
+<h3>Mais fácil ou mais difícil para os cúmplices</h3>
+<p>Se os cúmplices perdem quase sempre, escolham <b>Mais fácil</b>. Se ganham quase sempre, <b>Mais difícil</b>. A <a href="#fim">tabela da seção 5</a> mostra o que muda.</p>
+<h3>Relógio de conversa</h3>
+<p>Nas opções da sala, escolha 1, 1,5 ou 2 minutos de conversa por pergunta. Quando o tempo acaba, vem a próxima pergunta. O relógio para enquanto a mesa vota uma acusação.</p>
+<h3>Grupos grandes (9 a 12 pessoas)</h3>
+<ul>
+  <li>Liguem o relógio de conversa em 1,5 ou 2 minutos, para o ritmo não cair.</li>
+  <li>Na hora de acusar, fala uma pessoa por vez.</li>
+  <li>Com mais de 12, dividam em duas salas.</li>
+</ul>
+<h3>Um celular só</h3>
+<p>Toque em <b>Jogar com um celular só</b> e escreva os nomes. O celular passa de mão em mão: cada um segura o botão para ver o papel e passa adiante. Depois ele fica no meio da mesa.</p>
+<ol class="steps">
+  <li>Alguém lê a pergunta e as respostas em voz alta. A vale 1 dedo, B vale 2 e C vale 3.</li>
+  <li>Todos pensam com a mão escondida. “Um, dois, três, já!”: todos mostram 1, 2 ou 3 dedos ao mesmo tempo.</li>
+  <li>Alguém marca no celular os dedos de cada um e toca em <b>Revelar</b>.</li>
+  <li>Para acusar, alguém diz a dupla e todos levantam a mão (sim) ou não, juntos. Se a acusação passar, toque em <b>A mesa aprovou uma acusação</b> e marque a dupla. O celular revela.</li>
+</ol>
+<p>Quem esquecer o papel toca em <b>Rever papel</b>.</p>
+<h3>Perguntas da casa (com narrador)</h3>
+<p>O narrador inventa perguntas sobre a própria turma: “Quem dorme primeiro numa viagem: Bia, Caio ou Edu?”. Costumam ser as mais engraçadas.</p>
+</section>
+
+<section id="narrador">
+<h2>9. Sem celular: jogo com narrador</h2>
+<p>Para jogar hoje mesmo, sem nada de especial.</p>
+<p><b>Precisa de:</b> 1 narrador, que não joga (pode revezar a cada partida); 5 a 12 jogadores; papel e caneta; e um baralho comum ou as credenciais do kit. As perguntas podem vir das cartas do kit, da <a href="#perguntas">lista no fim desta página</a> ou da cabeça do narrador.</p>
+<h3>Preparação</h3>
+<ol class="steps">
+  <li>Separe uma carta por jogador: os <b>dois reis vermelhos</b> (copas e ouros) e, para completar, cartas pretas quaisquer. Rei vermelho é cúmplice; carta preta é detetive. Com o kit, use 2 credenciais de cúmplice e as de detetive.</li>
+  <li>Embaralhe e dê uma carta para cada um, virada para baixo. Cada um olha a sua em segredo e devolve ao narrador, ainda virada.</li>
+  <li>O narrador fala: “Todos fechem os olhos.” “Cúmplices, abram os olhos e vejam a sua dupla.” O narrador também olha quem são. “Cúmplices, fechem os olhos.” “Todos, abram os olhos.”</li>
+  <li>O narrador desenha uma grade no papel: uma linha por jogador e uma coluna por pergunta. É o histórico, e qualquer um pode pedir para ver. Ele anota também a meta (<a href="#fim">tabela da seção 5</a>).</li>
+</ol>
+<h3>Rodada</h3>
+<ol class="steps">
+  <li>O narrador lê a pergunta e as respostas com números: “1, coxinha. 2, empada. 3, quibe.”</li>
+  <li>Todos pensam em silêncio, com a mão escondida. O narrador conta “um, dois, três, já!” e todos mostram 1, 2 ou 3 dedos ao mesmo tempo, com a mão parada.</li>
+  <li>O narrador anota os dedos de cada um na grade e anuncia, sem fazer cara de nada: “<b>IGUAL!</b>” ou “<b>DIFERENTE!</b>”. Se for IGUAL, marca 1 ponto para os cúmplices.</li>
+  <li>A partir da 2ª pergunta, quem quiser diz: “Acuso Fulano e Beltrano.” O narrador conta “um, dois, três” e todos levantam a mão (sim) ou não, juntos. Se mais da metade da mesa levantar a mão, o narrador revela: “Certo!” (os detetives vencem) ou “Errado!” (1 ponto para os cúmplices; essa dupla fica inocentada e vem a próxima pergunta).</li>
+  <li>Quando a mesa quiser seguir, ou depois de uns 2 minutos, o narrador lê a próxima pergunta.</li>
+</ol>
+<div class="callout"><b>Dedos atrasados.</b> Quem mostrar os dedos depois do “já”, mudar os dedos ou mostrar outro número fica sem resposta naquela pergunta. Se for um cúmplice, conta como DIFERENTE.</div>
+<p>No fim, o narrador revela quem eram os cúmplices.</p>
+</section>
+
+<section id="dicas">
+<h2>10. Dicas</h2>
+<h3>Para os cúmplices</h3>
+<ul>
+  <li>Pense no que a sua dupla responderia. Quase sempre é a resposta mais óbvia, e ela ainda esconde vocês no meio de muita gente.</li>
+  <li>Responder igual numa resposta que pouca gente escolheu é perigoso: vocês viram suspeitos na hora.</li>
+  <li>Votar sim numa acusação errada dá ponto, mas fica no histórico.</li>
+  <li>Na conversa, desconfie de alguém com convicção. Quem acusa parece detetive.</li>
+</ul>
+<h3>Para os detetives</h3>
+<ul>
+  <li>O carimbo é a melhor pista. Com IGUAL, a dupla escolheu a mesma resposta; com DIFERENTE, respostas diferentes. Procure as duplas que batem com todos os carimbos.</li>
+  <li>Você sabe que é inocente: toda dupla com você está fora.</li>
+  <li>Responder diferente da maioria pode provar a sua inocência. Se der IGUAL e você ficou sozinho numa resposta, você não é cúmplice.</li>
+  <li>Repare em quem votou sim nas acusações erradas.</li>
+  <li>Acusação apressada dá ponto para eles. Com a meta perto, só acuse com bastante certeza, ou quando for a última chance.</li>
+</ul>
+</section>
+
+<section id="ensinar">
+<h2>11. Como ensinar em 3 minutos</h2>
+<p>Leia em voz alta, sem pressa. O site também tem esse guia, com figuras, no botão <b>Como jogar</b>.</p>
+<ol class="steps">
+  <li>“Dois de nós são cúmplices. O celular sorteia em segredo. Os dois sabem quem é a dupla. O resto é detetive.” <span class="muted">(30 segundos)</span></li>
+  <li>“A cada rodada aparece uma pergunta boba com três respostas. Todo mundo responde ao mesmo tempo, em silêncio.” <span class="muted">(30 segundos)</span></li>
+  <li>“Depois o celular mostra as respostas e diz só uma coisa: se os dois cúmplices responderam igual. Cada IGUAL é um ponto para eles. Eles não podem combinar nada: precisam pensar igual.” <span class="muted">(45 segundos)</span></li>
+  <li>“A partir da segunda pergunta, quem desconfiar propõe uma dupla e todos votam. Se mais da metade disser sim, o celular revela. Acertou, os detetives ganham. Errou, os cúmplices ganham um ponto.” <span class="muted">(45 segundos)</span></li>
+  <li>“Os cúmplices ganham se chegarem à meta que aparece na tela. Os detetives ganham se acharem a dupla ou se as perguntas acabarem antes.” <span class="muted">(30 segundos)</span></li>
+</ol>
+<p>Depois, comecem com a <b>pergunta de treino</b> ligada.</p>
+</section>
+
+<section id="simulacoes">
+<h2>12. Por que essas metas?</h2>
+<p>Antes de fechar as regras, foram simuladas 192.000 partidas com o mesmo motor que roda no site. Robôs fizeram o papel de mesas atentas (usam o histórico todo), normais, cautelosas e afobadas, e de cúmplices com mais ou menos sintonia.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Pessoas</th><th>Meta</th><th>Cúmplices vencem: mesa atenta</th><th>normal</th><th>cautelosa</th><th>afobada</th><th>Perguntas por partida</th></tr></thead>
+  <tbody><tr><td>5</td><td>3 em 5</td><td>35%</td><td>49%</td><td>21%</td><td>47%</td><td>2,6</td></tr><tr><td>6</td><td>3 em 5</td><td>43%</td><td>60%</td><td>36%</td><td>62%</td><td>2,9</td></tr><tr><td>7</td><td>3 em 4</td><td>44%</td><td>49%</td><td>36%</td><td>59%</td><td>3,1</td></tr><tr><td>8</td><td>3 em 4</td><td>45%</td><td>49%</td><td>41%</td><td>56%</td><td>3,3</td></tr><tr><td>9</td><td>4 em 7</td><td>42%</td><td>52%</td><td>35%</td><td>56%</td><td>4,3</td></tr><tr><td>10</td><td>4 em 7</td><td>45%</td><td>57%</td><td>40%</td><td>59%</td><td>4,5</td></tr><tr><td>11</td><td>4 em 6</td><td>45%</td><td>49%</td><td>39%</td><td>55%</td><td>4,6</td></tr><tr><td>12</td><td>4 em 6</td><td>47%</td><td>52%</td><td>44%</td><td>55%</td><td>4,8</td></tr></tbody>
+</table></div>
+<ul>
+  <li>Nenhuma partida travou nem passou do limite de perguntas. Os pontos sempre bateram: IGUAIS mais acusações erradas.</li>
+  <li>Com 5 pessoas, quase uma partida em cada cinco acabava na primeira pergunta. Por isso, na primeira pergunta ninguém acusa.</li>
+  <li>Com 3 ou 4 pessoas, os detetives nunca chegariam à maioria, e os cúmplices venceriam de 64% a 98% das vezes. Por isso o mínimo é 5.</li>
+  <li>Numa mesa atenta, os cúmplices vencem perto de 4 em cada 10 partidas; numa mesa normal, perto de metade. Quem deduz melhor ganha mais, e quem acusa com pressa perde mais.</li>
+</ul>
+</section>
+
+<section id="resumo-sec">
+<h2>13. Resumo de uma página</h2>
+<p class="noprint"><button class="btn" type="button" data-print="resumo">Imprimir só o resumo</button></p>
+<div class="resumo">
+  <div class="top"><span class="mark" aria-hidden="true" style="font-size:1.8rem"><i></i><i></i></span><span class="stamp">Cúmplices</span><span class="muted">Para 5 a 12 pessoas, a partir de 10 anos</span></div>
+  <div class="grid">
+    <div>
+      <h3>Objetivo</h3>
+      <p>Dois jogadores secretos, os <b>cúmplices</b>, tentam responder igual sem combinar. Os <b>detetives</b> tentam descobrir a dupla.</p>
+      <h3>Preparação</h3>
+      <p>O anfitrião cria a sala; os outros entram pelo código, link ou QR. Cada um segura o botão para ver o papel. Os cúmplices veem a sua dupla.</p>
+      <h3>A cada pergunta</h3>
+      <ol>
+        <li><b>Respondam em silêncio:</b> A, B ou C.</li>
+        <li><b>Revelação:</b> todas as respostas aparecem. IGUAL = os cúmplices escolheram a mesma: +1 ponto para eles.</li>
+        <li><b>Conversem.</b> Vale mentir. Não vale mostrar a tela.</li>
+        <li><b>Acusem</b> (da 2ª pergunta em diante): alguém propõe uma dupla e todos votam. Mais da metade diz sim: o celular revela. Certa: detetives vencem. Errada: +1 ponto para os cúmplices.</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Fim</h3>
+      <p><b>Cúmplices</b> vencem ao chegar à meta. <b>Detetives</b> vencem acusando a dupla certa ou se as perguntas acabarem antes.</p>
+      <table><thead><tr><th>Pessoas</th><th>Meta</th></tr></thead><tbody><tr><td>5 ou 6</td><td><b>3 IGUAIS</b> em até 5 perguntas</td></tr><tr><td>7 ou 8</td><td><b>3 IGUAIS</b> em até 4 perguntas</td></tr><tr><td>9 ou 10</td><td><b>4 IGUAIS</b> em até 7 perguntas</td></tr><tr><td>11 ou 12</td><td><b>4 IGUAIS</b> em até 6 perguntas</td></tr></tbody></table>
+      <p class="small">Sins para aprovar uma acusação (pessoas→sins): 5→3 6→4 7→4 8→5 9→5 10→6 11→6 12→7.</p>
+      <h3>Lembretes</h3>
+      <ul>
+        <li>Cada um propõe no máximo 1 acusação por pergunta.</li>
+        <li>Dupla inocentada não pode ser acusada de novo.</li>
+        <li>Quem não responde fica sem resposta (cúmplice sem resposta = DIFERENTE).</li>
+        <li>Sem celular: um narrador lê a pergunta, todos mostram 1, 2 ou 3 dedos juntos e ele anuncia IGUAL ou DIFERENTE.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="perguntas">
+<h2>14. Lista de perguntas</h2>
+<p>As 220 perguntas do site, para o modo com narrador ou para inspirar perguntas da casa.</p>
+<details class="qs"><summary>Mostrar todas as perguntas</summary>
+<ol class="qlist"><li><b>Qual é o melhor salgado de festa?</b> <span>1) Coxinha / 2) Empada / 3) Quibe</span></li><li><b>Pizza boa de verdade é de:</b> <span>1) Muçarela / 2) Frango com catupiry / 3) Chocolate</span></li><li><b>O que não pode faltar no almoço de domingo?</b> <span>1) Arroz e feijão / 2) Macarrão / 3) Churrasco</span></li><li><b>Qual é a melhor sobremesa?</b> <span>1) Pudim / 2) Brigadeiro / 3) Sorvete</span></li><li><b>O que é mais estranho?</b> <span>1) Pizza com abacaxi / 2) Feijão com açúcar / 3) Pastel de chocolate</span></li><li><b>Pipoca boa é:</b> <span>1) Salgada / 2) Doce / 3) Com leite condensado</span></li><li><b>Se só pudesse comer uma fruta para sempre:</b> <span>1) Manga / 2) Banana / 3) Morango</span></li><li><b>Melhor recheio de bolo:</b> <span>1) Chocolate / 2) Doce de leite / 3) Morango com creme</span></li><li><b>Café da manhã dos sonhos:</b> <span>1) Pão na chapa / 2) Tapioca / 3) Bolo da vó</span></li><li><b>O que é pior encontrar na comida?</b> <span>1) Fio de cabelo / 2) Casca de ovo / 3) Uva-passa</span></li><li><b>Açaí bom é com:</b> <span>1) Granola / 2) Leite condensado / 3) Paçoca</span></li><li><b>Melhor bebida no calor:</b> <span>1) Suco de laranja / 2) Água de coco / 3) Guaraná</span></li><li><b>Melhor doce de festa junina:</b> <span>1) Paçoca / 2) Pé de moleque / 3) Canjica</span></li><li><b>O que você leva para um piquenique?</b> <span>1) Sanduíche / 2) Bolo / 3) Frutas</span></li><li><b>Batata frita combina com:</b> <span>1) Ketchup / 2) Maionese / 3) Nada, pura</span></li><li><b>Strogonoff perfeito é de:</b> <span>1) Frango / 2) Carne / 3) Camarão</span></li><li><b>Melhor sabor de sorvete:</b> <span>1) Chocolate / 2) Flocos / 3) Creme</span></li><li><b>Ovo bom é:</b> <span>1) Frito / 2) Mexido / 3) Cozido</span></li><li><b>Pastel de feira bom é de:</b> <span>1) Carne / 2) Queijo / 3) Pizza</span></li><li><b>Melhor refeição do dia:</b> <span>1) Café da manhã / 2) Almoço / 3) Lanche da tarde</span></li><li><b>Melhor acompanhamento do churrasco:</b> <span>1) Farofa / 2) Vinagrete / 3) Pão de alho</span></li><li><b>Miojo é:</b> <span>1) Comida de verdade / 2) Lanche de emergência / 3) Um crime</span></li><li><b>O que é pior?</b> <span>1) Suco quente / 2) Refrigerante sem gás / 3) Pão murcho</span></li><li><b>O rei do lanche da escola:</b> <span>1) Bolacha recheada / 2) Salgadinho / 3) Sanduíche</span></li><li><b>Bolo de aniversário ideal:</b> <span>1) Chocolate / 2) Prestígio / 3) Morango</span></li><li><b>A borda da pizza é:</b> <span>1) A melhor parte / 2) Sobra para o cachorro / 3) Só se for recheada</span></li><li><b>Arroz bom é:</b> <span>1) Soltinho / 2) Grudadinho / 3) Tanto faz</span></li><li><b>Pão de queijo é melhor:</b> <span>1) No café da manhã / 2) No lanche da tarde / 3) A qualquer hora</span></li><li><b>Feijão no prato fica:</b> <span>1) Por cima do arroz / 2) Do lado do arroz / 3) Num potinho separado</span></li><li><b>Melhor tempero:</b> <span>1) Alho / 2) Cebola / 3) Cheiro-verde</span></li><li><b>Lanche da tarde ideal:</b> <span>1) Doce / 2) Salgado / 3) Os dois</span></li><li><b>Melhor fruta para comer no pé:</b> <span>1) Jabuticaba / 2) Goiaba / 3) Manga</span></li><li><b>Qual é o melhor biscoito?</b> <span>1) Recheado / 2) Água e sal / 3) Polvilho</span></li><li><b>Cachorro-quente bom tem:</b> <span>1) Purê de batata / 2) Batata palha / 3) Só a salsicha</span></li><li><b>O que você pede na lanchonete?</b> <span>1) Hambúrguer / 2) Misto-quente / 3) Pastel</span></li><li><b>Melhor chocolate:</b> <span>1) Ao leite / 2) Meio amargo / 3) Branco</span></li><li><b>Sopa no jantar é:</b> <span>1) Uma delícia / 2) Coisa de doente / 3) Só no frio</span></li><li><b>Qual é o melhor suco?</b> <span>1) Maracujá / 2) Uva / 3) Limão</span></li><li><b>Bicho de estimação ideal:</b> <span>1) Cachorro / 2) Gato / 3) Peixe</span></li><li><b>Se você fosse um bicho, seria:</b> <span>1) Preguiça / 2) Papagaio / 3) Gato</span></li><li><b>Pior colega de quarto:</b> <span>1) Galinha / 2) Macaco / 3) Gambá</span></li><li><b>Bicho mais assustador:</b> <span>1) Barata voadora / 2) Aranha / 3) Cobra</span></li><li><b>Qual bicho seria o mais fofoqueiro?</b> <span>1) Papagaio / 2) Gato / 3) Galinha</span></li><li><b>Num sítio, você teria:</b> <span>1) Cavalo / 2) Bode / 3) Porquinho</span></li><li><b>Pior bicho para achar no banheiro:</b> <span>1) Sapo / 2) Lagartixa / 3) Barata</span></li><li><b>Qual bicho seria o melhor professor?</b> <span>1) Coruja / 2) Golfinho / 3) Tartaruga</span></li><li><b>Poder de bicho que você queria:</b> <span>1) Voar / 2) Respirar debaixo d’água / 3) Correr muito</span></li><li><b>Bicho mais fofo:</b> <span>1) Filhote de cachorro / 2) Coelho / 3) Panda</span></li><li><b>Qual bicho seria o pior motorista?</b> <span>1) Elefante / 2) Polvo / 3) Bicho-preguiça</span></li><li><b>Qual bicho tem cara de segunda-feira?</b> <span>1) Bicho-preguiça / 2) Coruja / 3) Tartaruga</span></li><li><b>Qual bicho ganharia um concurso de dança?</b> <span>1) Pinguim / 2) Flamingo / 3) Canguru</span></li><li><b>Se seu cachorro falasse, diria primeiro:</b> <span>1) “Comida!” / 2) “Passear!” / 3) “Quem é no portão?!”</span></li><li><b>Qual bicho seria o melhor goleiro?</b> <span>1) Polvo / 2) Gato / 3) Canguru</span></li><li><b>Qual bicho você queria ser por um dia?</b> <span>1) Pássaro / 2) Golfinho / 3) Gato de madame</span></li><li><b>Melhor superpoder:</b> <span>1) Voar / 2) Ficar invisível / 3) Ler mentes</span></li><li><b>Pior superpoder:</b> <span>1) Voar a 10 cm do chão / 2) Ler a mente de pombos / 3) Ficar invisível de olhos fechados</span></li><li><b>Máquina do tempo:</b> <span>1) Ir para o passado / 2) Ir para o futuro / 3) Fico no presente</span></li><li><b>Seu robô faria:</b> <span>1) A comida / 2) A faxina / 3) A lição de casa</span></li><li><b>Você prefere nunca mais sentir:</b> <span>1) Frio / 2) Sono / 3) Fome</span></li><li><b>Um gênio te dá um desejo:</b> <span>1) Viajar pelo mundo / 2) Uma casa enorme / 3) Saber tudo</span></li><li><b>Objeto mágico ideal:</b> <span>1) Tapete voador / 2) Varinha / 3) Bolsa sem fundo</span></li><li><b>Por um dia, você prefere ser:</b> <span>1) Gigante / 2) Minúsculo / 3) Invisível</span></li><li><b>Pior “maldição”:</b> <span>1) Soluçar para sempre / 2) Espirrar a cada 5 minutos / 3) Falar rimando</span></li><li><b>Morar num lugar mágico:</b> <span>1) Castelo nas nuvens / 2) Cidade no fundo do mar / 3) Floresta encantada</span></li><li><b>Você ganha o poder de falar com:</b> <span>1) Bichos / 2) Plantas / 3) Objetos</span></li><li><b>Mascote mágico:</b> <span>1) Dragão pequeno / 2) Dinossauro / 3) Unicórnio</span></li><li><b>Teletransporte para:</b> <span>1) A praia / 2) A casa da vó / 3) A cama</span></li><li><b>Congelar o tempo para:</b> <span>1) Dormir mais / 2) Terminar tudo que falta / 3) Pregar peças</span></li><li><b>Viagem só de ida para:</b> <span>1) A Lua / 2) O fundo do mar / 3) O Polo Norte</span></li><li><b>Você prefere:</b> <span>1) Lembrar de tudo / 2) Esquecer o que quiser / 3) Ver 1 minuto do futuro</span></li><li><b>Uma casa diferente:</b> <span>1) Na árvore / 2) Num barco / 3) Debaixo da terra</span></li><li><b>Férias perfeitas:</b> <span>1) Praia / 2) Montanha / 3) Cidade grande</span></li><li><b>Viagem dos sonhos:</b> <span>1) Japão / 2) Europa / 3) Nordeste brasileiro</span></li><li><b>Melhor jeito de viajar:</b> <span>1) Avião / 2) Carro com música / 3) Trem</span></li><li><b>Na viagem de carro, você é quem:</b> <span>1) Dorme / 2) Escolhe as músicas / 3) Pergunta “falta muito?”</span></li><li><b>Pior coisa numa viagem:</b> <span>1) Esquecer o carregador / 2) Perder a mala / 3) Chover todo dia</span></li><li><b>Melhor lugar para acampar:</b> <span>1) Na praia / 2) Na montanha / 3) No quintal de casa</span></li><li><b>Hotel ideal:</b> <span>1) Pé na areia / 2) No meio do mato / 3) Com piscina gigante</span></li><li><b>Melhor estação do ano:</b> <span>1) Verão / 2) Inverno / 3) Primavera</span></li><li><b>Dia de chuva é bom para:</b> <span>1) Dormir / 2) Ver filme / 3) Tomar banho de chuva</span></li><li><b>Morar onde?</b> <span>1) Na praia / 2) No interior / 3) Na cidade grande</span></li><li><b>Passeio de domingo:</b> <span>1) Parque / 2) Shopping / 3) Casa da vó</span></li><li><b>Melhor parte de viajar:</b> <span>1) A comida / 2) As fotos / 3) Voltar para casa</span></li><li><b>Fazer as malas:</b> <span>1) Na véspera / 2) Uma semana antes / 3) Cinco minutos antes</span></li><li><b>Na praia, você é quem:</b> <span>1) Fica no mar / 2) Fica na sombra / 3) Fica na barraca de milho</span></li><li><b>Parque de diversões: primeiro brinquedo:</b> <span>1) Montanha-russa / 2) Roda-gigante / 3) Carrinho de bate-bate</span></li><li><b>Viajar com:</b> <span>1) A família toda / 2) Os amigos / 3) Sozinho</span></li><li><b>Pior tarefa de casa:</b> <span>1) Lavar louça / 2) Passar roupa / 3) Limpar banheiro</span></li><li><b>Hora ideal de acordar:</b> <span>1) 6h, cheio de energia / 2) 9h, tranquilo / 3) Meio-dia, sem culpa</span></li><li><b>Banho bom é:</b> <span>1) Bem quente / 2) Morno / 3) Gelado</span></li><li><b>Arrumar a cama:</b> <span>1) Todo dia / 2) Às vezes / 3) Para quê?</span></li><li><b>Pior barulho para acordar:</b> <span>1) Despertador / 2) Furadeira do vizinho / 3) Galo</span></li><li><b>O que é mais irritante?</b> <span>1) Chinelo arrebentar / 2) Meia molhada / 3) Pisar em peça de montar</span></li><li><b>Lugar favorito da casa:</b> <span>1) Cama / 2) Sofá / 3) Cozinha</span></li><li><b>Domingo perfeito:</b> <span>1) Dormir até tarde / 2) Almoço em família / 3) Passeio ao ar livre</span></li><li><b>Primeira coisa ao acordar:</b> <span>1) Olhar o celular / 2) Ir ao banheiro / 3) Enrolar mais um pouco</span></li><li><b>Pior coisa para acabar em casa:</b> <span>1) Papel higiênico / 2) Gás de cozinha / 3) Internet</span></li><li><b>Pote de sorvete na geladeira tem:</b> <span>1) Sorvete / 2) Feijão / 3) Mistério</span></li><li><b>Quem manda no controle da TV?</b> <span>1) Quem chegou primeiro / 2) Quem é mais velho / 3) Ninguém acha o controle</span></li><li><b>O que mais some em casa?</b> <span>1) Controle remoto / 2) Tampa de pote / 3) Pé de meia</span></li><li><b>Dormir com:</b> <span>1) Ventilador / 2) Cobertor / 3) Os dois juntos</span></li><li><b>No grupo da família, você:</b> <span>1) Manda bom-dia com figurinha / 2) Só lê / 3) Manda áudio longo</span></li><li><b>Na hora de dormir:</b> <span>1) Escuro total / 2) Abajur aceso / 3) TV ligada</span></li><li><b>Melhor lugar para um cochilo:</b> <span>1) Rede / 2) Sofá / 3) Carro andando</span></li><li><b>Na cozinha, você prefere:</b> <span>1) Cozinhar / 2) Lavar a louça / 3) Só comer</span></li><li><b>Pior coisa em dia de calor:</b> <span>1) Ônibus lotado / 2) Acabar a água gelada / 3) Ventilador quebrar</span></li><li><b>Pior coisa em dia de frio:</b> <span>1) Sair do banho / 2) Sair da cama / 3) Lavar louça</span></li><li><b>Vizinho barulhento às 7h de sábado:</b> <span>1) Reclamo / 2) Coloco fone / 3) Faço barulho de volta</span></li><li><b>Achou dinheiro no bolso da calça velha:</b> <span>1) Gasto com doce / 2) Guardo / 3) Conto para todo mundo</span></li><li><b>Matéria mais difícil:</b> <span>1) Matemática / 2) Português / 3) Química</span></li><li><b>Melhor parte da escola:</b> <span>1) Recreio / 2) Educação física / 3) Hora da saída</span></li><li><b>Na sala de aula, você senta:</b> <span>1) Na frente / 2) No meio / 3) No fundão</span></li><li><b>Pior coisa na escola:</b> <span>1) Prova surpresa / 2) Trabalho em grupo / 3) Apresentar para a turma</span></li><li><b>Lição de casa:</b> <span>1) Faço na hora / 2) Deixo para a noite / 3) Faço no recreio</span></li><li><b>Se você fosse professor, ensinaria:</b> <span>1) Culinária / 2) Videogame / 3) Como fazer amigos</span></li><li><b>Profissão dos sonhos de criança:</b> <span>1) Astronauta / 2) Jogador de futebol / 3) Veterinário</span></li><li><b>Pior emprego:</b> <span>1) Contador de grãos de areia / 2) Despertador humano / 3) Provador de remédio</span></li><li><b>No trabalho em grupo, você é quem:</b> <span>1) Faz tudo / 2) Organiza / 3) Some</span></li><li><b>Melhor material escolar:</b> <span>1) Caneta colorida / 2) Borracha cheirosa / 3) Estojo cheio de divisões</span></li><li><b>Prova difícil. Você:</b> <span>1) Estuda na véspera / 2) Estuda a semana toda / 3) Confia na sorte</span></li><li><b>Melhor excursão da escola:</b> <span>1) Zoológico / 2) Museu / 3) Parque aquático</span></li><li><b>Reunião que podia ser uma mensagem. Você:</b> <span>1) Aceita / 2) Reclama baixinho / 3) Finge que a internet caiu</span></li><li><b>Celular sem bateria. Você:</b> <span>1) Fica tranquilo / 2) Fica nervoso / 3) Caça uma tomada</span></li><li><b>Pior coisa no celular:</b> <span>1) Tela trincada / 2) Memória cheia / 3) Bateria em 1%</span></li><li><b>Melhor jeito de responder mensagem:</b> <span>1) Texto / 2) Áudio / 3) Figurinha</span></li><li><b>Áudio aceitável:</b> <span>1) Até 30 segundos / 2) Até 2 minutos / 3) Podcast de 10 minutos</span></li><li><b>Uma semana sem:</b> <span>1) Celular / 2) Televisão / 3) Doce</span></li><li><b>Foto boa é:</b> <span>1) Selfie / 2) Paisagem / 3) Foto da comida</span></li><li><b>Pior coisa numa chamada de vídeo:</b> <span>1) Travar com cara feia / 2) Microfone ligado sem querer / 3) Câmera ligada sem querer</span></li><li><b>Se você inventasse um app, ele:</b> <span>1) Acharia coisas perdidas / 2) Faria a lição / 3) Traduziria bichos</span></li><li><b>Ligação de número desconhecido:</b> <span>1) Atendo / 2) Ignoro / 3) Pesquiso o número</span></li><li><b>No videogame, você prefere:</b> <span>1) Corrida / 2) Aventura / 3) Futebol</span></li><li><b>Melhor festa do ano:</b> <span>1) Festa junina / 2) Natal / 3) Aniversário</span></li><li><b>Na festa junina, você vai pela:</b> <span>1) Comida / 2) Quadrilha / 3) Pescaria</span></li><li><b>Presente bom é:</b> <span>1) Surpresa / 2) O que eu pedi / 3) Feito à mão</span></li><li><b>Pior presente de amigo secreto:</b> <span>1) Meia / 2) Sabonete / 3) Pano de prato</span></li><li><b>Melhor parte do aniversário:</b> <span>1) Cantar parabéns / 2) Os docinhos / 3) Os presentes</span></li><li><b>Na hora do parabéns, você:</b> <span>1) Canta alto / 2) Só bate palma / 3) Fica de olho no brigadeiro</span></li><li><b>Melhor da ceia de Natal:</b> <span>1) Peru / 2) Farofa / 3) Rabanada</span></li><li><b>Virada do ano:</b> <span>1) Na praia / 2) Com a família / 3) Dormindo antes da meia-noite</span></li><li><b>Melhor brincadeira de festa:</b> <span>1) Pescaria / 2) Boca do palhaço / 3) Argolas</span></li><li><b>Pior momento de uma festa:</b> <span>1) Acabar o refrigerante / 2) Música ruim / 3) Hora de ir embora</span></li><li><b>Na festa, você é quem:</b> <span>1) Dança / 2) Fica perto da comida / 3) Conversa no cantinho</span></li><li><b>Brigadeiro bom é:</b> <span>1) De colher / 2) Enrolado / 3) No pote com granulado</span></li><li><b>Melhor brincadeira de rua:</b> <span>1) Pega-pega / 2) Esconde-esconde / 3) Queimada</span></li><li><b>No futebol, você é:</b> <span>1) Atacante / 2) Goleiro / 3) Torcedor</span></li><li><b>Esporte para assistir:</b> <span>1) Futebol / 2) Vôlei / 3) Nenhum</span></li><li><b>Brincadeira mais injusta:</b> <span>1) Batata quente / 2) Dança das cadeiras / 3) Pega-pega</span></li><li><b>Jogo de tabuleiro clássico:</b> <span>1) Dama / 2) Xadrez / 3) Ludo</span></li><li><b>Esporte mais engraçado com bichos:</b> <span>1) Futebol de pinguins / 2) Vôlei de girafas / 3) Natação de gatos</span></li><li><b>Numa olimpíada, você competiria em:</b> <span>1) Corrida / 2) Natação / 3) Arremesso de chinelo</span></li><li><b>No esconde-esconde, você:</b> <span>1) Some de verdade / 2) É achado primeiro / 3) Ri e se entrega</span></li><li><b>Pior castigo:</b> <span>1) Uma semana sem internet / 2) Uma semana sem doce / 3) Uma semana sem banho</span></li><li><b>Você prefere, para sempre:</b> <span>1) Cheiro de cebola / 2) Falar rimando / 3) Andar de costas</span></li><li><b>Pior dor:</b> <span>1) Pisar em peça de montar / 2) Bater o dedinho na quina / 3) Morder a língua</span></li><li><b>Pior coisa no sapato:</b> <span>1) Pedrinha / 2) Areia / 3) Água</span></li><li><b>Você se atrasou. A culpa é:</b> <span>1) Do trânsito / 2) Do despertador / 3) Do cachorro</span></li><li><b>Usar a mesma roupa para sempre:</b> <span>1) Pijama / 2) Uniforme da escola / 3) Roupa de festa</span></li><li><b>O que é mais constrangedor?</b> <span>1) Chamar a professora de mãe / 2) Acenar para quem não acenou / 3) Tropeçar em público</span></li><li><b>Pior som:</b> <span>1) Giz no quadro / 2) Mastigar de boca aberta / 3) Pernilongo no ouvido</span></li><li><b>Pior coisa para esquecer:</b> <span>1) Aniversário da mãe / 2) Senha do celular / 3) Onde deixou a chave</span></li><li><b>Festa sem nenhum conhecido. Você:</b> <span>1) Puxa conversa / 2) Vai direto para a comida / 3) Fica no celular</span></li><li><b>Achou uma caixa de chocolates sem dono:</b> <span>1) Divido com todos / 2) Guardo escondido / 3) Procuro o dono</span></li><li><b>Pior lugar para ficar preso:</b> <span>1) Elevador / 2) Banheiro químico / 3) Fila do banco</span></li><li><b>Se a internet acabasse para sempre:</b> <span>1) Leria mais / 2) Dormiria mais / 3) Entraria em pânico</span></li><li><b>Só pode falar uma palavra por um dia:</b> <span>1) “Sim” / 2) “Não” / 3) “Talvez”</span></li><li><b>O que é pior?</b> <span>1) Soluço / 2) Espirro preso / 3) Bocejo no meio da conversa</span></li><li><b>Se você fosse um móvel, seria:</b> <span>1) Sofá / 2) Geladeira / 3) Rede</span></li><li><b>Se você fosse uma comida, seria:</b> <span>1) Pão de queijo / 2) Pimenta / 3) Pudim</span></li><li><b>Se você fosse uma cor, seria:</b> <span>1) Amarelo / 2) Azul / 3) Verde</span></li><li><b>Se você fosse um clima, seria:</b> <span>1) Sol / 2) Chuva / 3) Nublado</span></li><li><b>Se sua vida fosse um filme, seria:</b> <span>1) Comédia / 2) Aventura / 3) Suspense</span></li><li><b>Música para acordar:</b> <span>1) Animada / 2) Calminha / 3) Nenhuma, silêncio!</span></li><li><b>Pior cheiro:</b> <span>1) Ovo podre / 2) Chulé / 3) Lixo no sol</span></li><li><b>O que é mais difícil?</b> <span>1) Não rir quando alguém tropeça / 2) Uma hora sem celular / 3) Acordar cedo no sábado</span></li><li><b>Melhor jeito de passar o tempo na fila:</b> <span>1) Conversando / 2) No celular / 3) Reclamando</span></li><li><b>Pior invenção possível:</b> <span>1) Guarda-chuva de papel / 2) Chinelo de vidro / 3) Colher furada</span></li><li><b>Prefeito por um dia. Primeira lei:</b> <span>1) Sorvete grátis / 2) Feriado toda sexta / 3) Proibido acordar cedo</span></li><li><b>O que dá mais medo?</b> <span>1) Escuro / 2) Altura / 3) Falar em público</span></li><li><b>Você prefere ser:</b> <span>1) Muito engraçado / 2) Muito inteligente / 3) Muito sortudo</span></li><li><b>Melhor jeito de pedir desculpa:</b> <span>1) Com abraço / 2) Com doce / 3) Com bilhete</span></li><li><b>Se ganhasse uma loja, seria de:</b> <span>1) Doces / 2) Brinquedos / 3) Livros</span></li><li><b>Melhor dia da semana:</b> <span>1) Sexta / 2) Sábado / 3) Domingo</span></li><li><b>Melhor parte do dia:</b> <span>1) Manhã / 2) Tarde / 3) Noite</span></li><li><b>Na fila do pão, a culpa da demora é:</b> <span>1) Do pão que não saiu / 2) De quem paga com moeda / 3) De quem puxa conversa</span></li><li><b>Pior lugar para o celular tocar:</b> <span>1) No cinema / 2) Na prova / 3) Numa reunião séria</span></li><li><b>Com uma hora a mais no dia, você:</b> <span>1) Dormiria / 2) Jogaria / 3) Comeria</span></li><li><b>Melhor fase da vida:</b> <span>1) Infância / 2) Adolescência / 3) Ser adulto</span></li><li><b>Pior tristeza pequena:</b> <span>1) Acabar a série favorita / 2) Derrubar o sorvete / 3) Perder no jogo</span></li><li><b>Talento escondido que você queria:</b> <span>1) Cantar / 2) Dançar / 3) Cozinhar</span></li><li><b>Melhor resposta para “tudo bem?”:</b> <span>1) “Tudo, e você?” / 2) “Mais ou menos” / 3) “Senta que lá vem história”</span></li><li><b>Barulho mais gostoso:</b> <span>1) Chuva no telhado / 2) Pipoca estourando / 3) Mar</span></li><li><b>O que é mais bonito?</b> <span>1) Pôr do sol / 2) Céu estrelado / 3) Arco-íris</span></li><li><b>Nome novo por um dia:</b> <span>1) Um nome chique / 2) Um nome engraçado / 3) Nome de super-herói</span></li><li><b>Numa ilha deserta, você leva:</b> <span>1) Rede / 2) Panela / 3) Celular sem sinal</span></li><li><b>Seu lema de vida:</b> <span>1) “Calma que dá certo” / 2) “Primeiro o lanche” / 3) “Só mais cinco minutinhos”</span></li><li><b>Nome para o cachorro da família:</b> <span>1) Nome de comida / 2) Nome de gente / 3) Nome de herói</span></li><li><b>Melhor cheiro:</b> <span>1) Bolo saindo do forno / 2) Terra molhada / 3) Roupa limpa</span></li><li><b>Pior coisa para derrubar no chão:</b> <span>1) Sorvete de casquinha / 2) Celular / 3) Prato de comida</span></li><li><b>Aprender na hora uma língua:</b> <span>1) Inglês / 2) Japonês / 3) A língua dos bichos</span></li><li><b>Num dia de folga inesperado, você:</b> <span>1) Dorme / 2) Sai para passear / 3) Arruma a casa</span></li><li><b>O que é mais chato de esperar?</b> <span>1) Ônibus / 2) Comida ficar pronta / 3) Download terminar</span></li><li><b>Pior “visita” em casa:</b> <span>1) Pernilongo / 2) Formiga no açúcar / 3) Pombo na janela</span></li><li><b>Melhor conselho de vó:</b> <span>1) “Leva um casaco” / 2) “Come mais um pouco” / 3) “Vai com Deus”</span></li><li><b>Seu superpoder no dia a dia:</b> <span>1) Achar coisas perdidas / 2) Dormir em qualquer lugar / 3) Comer muito</span></li><li><b>Qual seria o pior emprego para você?</b> <span>1) Palhaço de festa / 2) Salva-vidas / 3) Locutor de rodeio</span></li><li><b>Num restaurante, você:</b> <span>1) Pede sempre o mesmo / 2) Testa algo novo / 3) Pede o que o outro pediu</span></li><li><b>Pior coisa no cinema:</b> <span>1) Gente falando / 2) Cabeça na frente / 3) Acabar a pipoca no começo</span></li><li><b>Qual é o melhor tipo de filme?</b> <span>1) Animação / 2) Comédia / 3) Aventura</span></li><li><b>Pão francês bom é:</b> <span>1) Com manteiga / 2) Na chapa / 3) Com requeijão</span></li><li><b>Qual bicho ficaria mais engraçado de terno?</b> <span>1) Pinguim / 2) Girafa / 3) Hipopótamo</span></li><li><b>Comida de vó imbatível:</b> <span>1) Bolo de fubá / 2) Arroz-doce / 3) Pastel frito na hora</span></li><li><b>Ganhou uma tarde livre. Você:</b> <span>1) Maratona de série / 2) Sai com os amigos / 3) Cochilo épico</span></li><li><b>O que é pior esquecer em casa?</b> <span>1) Celular / 2) Carteira / 3) Guarda-chuva em dia de chuva</span></li><li><b>Melhor sabor de picolé:</b> <span>1) Limão / 2) Chocolate / 3) Coco</span></li><li><b>Se o seu celular falasse, reclamaria de:</b> <span>1) Selfie demais / 2) Bateria sempre no fim / 3) Áudio demais</span></li><li><b>Pior mania no ônibus:</b> <span>1) Música sem fone / 2) Sentar no corredor / 3) Comer coisa com cheiro</span></li><li><b>Morar dentro de um desenho animado de:</b> <span>1) Princesas / 2) Super-heróis / 3) Bichos que falam</span></li><li><b>Chuva forte, guarda-chuva quebrado. Você:</b> <span>1) Corre / 2) Espera passar / 3) Aproveita e se molha</span></li><li><b>Melhor parte do cinema:</b> <span>1) O filme / 2) A pipoca / 3) Os trailers</span></li></ol>
+</details>
+</section>
+
+<footer>
+<p>Cúmplices é um jogo original. Fontes Rubik e Rubik Dirt (SIL Open Font License). <a href="./">Voltar para o jogo</a>.</p>
+</footer>
+</main>
+<script>
+document.addEventListener('click', function (ev) {
+  var b = ev.target.closest('[data-print]');
+  if (!b) return;
+  if (b.getAttribute('data-print') === 'resumo') {
+    document.body.classList.add('so-resumo');
+    var off = function () { document.body.classList.remove('so-resumo'); window.removeEventListener('afterprint', off); };
+    window.addEventListener('afterprint', off);
+    window.print();
+    setTimeout(off, 1500);
+  } else {
+    window.print();
+  }
+});
+</script>
+</body>
+</html>
