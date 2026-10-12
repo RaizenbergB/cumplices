@@ -1,0 +1,24 @@
+{
+  "name": "cumplices",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "peerjs": "^1.5.5"
+  },
+  "devDependencies": {
+    "@fontsource/rubik": "^5.3.0",
+    "@fontsource/rubik-dirt": "^5.3.0",
+    "aedes": "^1.2.0",
+    "aedes-server-factory": "^0.2.1",
+    "esbuild": "^0.25.10",
+    "peer": "^1.0.2",
+    "qrcode-generator": "^2.0.4"
+  },
+  "description": "Cúmplices: jogo de dedução para 5 a 12 pessoas, cada uma no seu celular.",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test --test-concurrency=1 test/*.test.mjs",
+    "simular": "node sim/relatorio.mjs 4000"
+  }
+}

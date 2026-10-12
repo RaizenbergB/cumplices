@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+{{HEAD}}
+<style>
+@font-face{font-family:'Rubik';font-weight:400;font-display:swap;src:url('fontes/rubik-400.woff2') format('woff2')}
+@font-face{font-family:'Rubik';font-weight:800;font-display:swap;src:url('fontes/rubik-800.woff2') format('woff2')}
+body{margin:0;background:#f3f5f9;color:#171b2e;font:17px/1.55 'Rubik',system-ui,sans-serif}
+main{max-width:40rem;margin:0 auto;padding:24px 16px 64px}
+h1{font-weight:800;font-size:2rem;margin:0 0 8px}
+table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border-bottom:1px solid #d8dde8;padding:6px 4px;text-align:left}
+a{color:#2f5db5;font-weight:700}
+@media (prefers-color-scheme:dark){body{background:#0f121c;color:#eceef5}td,th{border-color:#2b3144}a{color:#7aa2f7}}
+</style>
+</head>
+<body><main>
+<h1>Regras do Cúmplices</h1>
+<p>O livro de regras completo chega em instantes. Enquanto isso, use o <a href="./">Como jogar</a> dentro do jogo.</p>
+<table><thead><tr><th>Pessoas</th><th>Meta</th><th>Perguntas</th><th>Mais fácil</th><th>Mais difícil</th></tr></thead><tbody>{{TABELA}}</tbody></table>
+<table hidden>{{TABELA_CURTA}}{{MAIORIA}}</table>
+<p hidden>{{SITE}} {{PERGUNTAS}} {{PRIMEIRA_ACUSACAO}}</p>
+</main></body></html>
