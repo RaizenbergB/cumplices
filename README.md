@@ -37,9 +37,9 @@ Também dá para jogar com **um celular só** (passando de mão em mão) ou **se
 - O celular de quem cria a sala guarda a partida. Ele deve ficar com a tela acesa até o fim. Se a página recarregar, é só tocar em **Voltar para a sala**.
 - Os celulares se conectam por dois caminhos ao mesmo tempo:
   - direto, pelo PeerJS (WebRTC);
-  - e, como plano B, por servidores públicos de mensagens (MQTT da EMQX e da HiveMQ).
+  - e, como plano B, por três servidores públicos de mensagens (MQTT: HiveMQ, Mosquitto e EMQX).
 
-  Cada celular fica com o caminho que abrir primeiro. Se um cair, o outro segura.
+  Cada celular fica com o caminho que abrir primeiro. Se um cair, os outros seguram. Em out/2026 os três caminhos foram testados de um computador no Brasil: a sala abriu em meio segundo e os celulares entraram em 1 a 4 segundos.
 - Se a internet oscilar, cada celular volta sozinho para o mesmo lugar. Quem trocou de celular volta pelo mesmo nome.
 
 ## Para mexer no código
